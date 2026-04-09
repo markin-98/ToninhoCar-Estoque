@@ -1,23 +1,26 @@
 # TÍTULO DO PROJETO
 
-`CURSO`
+`Tecnologia em Análise e Desenvolvimento de Sistemas`
 
-`DISCIPLINA`
+`Trabalho Interdisciplinar: Aplicação Móvel`
 
-`SEMESTRE`
+`4° SEMESTRE`
 
 Descrever resumidamente, em um ou dois parágrafos, o projeto que está sendo desenvolvido.
 
+O projeto Toninho Car Estoque é um aplicativo mobile para controle de estoque de uma mecânica automotiva. Ele foi criado para organizar o cadastro de peças e produtos, registrar entradas e saídas, consultar itens disponíveis e acompanhar preços e movimentações do estoque.
+
+A aplicação terá acesso para administrador e funcionário, permitindo mais controle, agilidade e organização na rotina da oficina.
+
 ## Integrantes
 
-* Nome completo do aluno 1
-* Nome completo do aluno 2
-* Nome completo do aluno 3
-* Nome completo do aluno 4
+* Marcus Vinicius
+* Geovane Araujo
+* Rafael Oliveira
 
 ## Orientador
 
-* Nome completo do professor 1
+* Pedro Felipe
 
 ## Instruções de utilização
 
