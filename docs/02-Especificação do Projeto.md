@@ -61,7 +61,7 @@ A técnica foi aplicada da seguinte forma:
 ### Requisitos Funcionais
 
 | ID | Descrição do Requisito | Prioridade | Responsável |
-|----|-------------------------|------------|-------------|
+|--------|-------------------------|------------|-------------|
 | RF-001 | Permitir que o usuário realize login no sistema conforme seu perfil de acesso | ALTA | Equipe |
 | RF-002 | Permitir que o administrador gerencie os produtos do estoque, incluindo cadastro, edição e exclusão | ALTA | Equipe |
 | RF-003 | Permitir que o administrador gerencie os preços dos produtos, incluindo cadastro e alteração | ALTA | Equipe |
