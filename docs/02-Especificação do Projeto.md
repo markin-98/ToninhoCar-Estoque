@@ -36,21 +36,16 @@ Com base na análise das personas, foram identificadas as seguintes histórias d
 | EU COMO... `PERSONA` | QUERO/PRECISO ... `FUNCIONALIDADE` | PARA ... `MOTIVO/VALOR` |
 |----------------------|------------------------------------|--------------------------|
 | Administrador | realizar login com perfil administrativo | acessar as funcionalidades de gerenciamento do sistema |
-| Administrador | cadastrar novos produtos | manter o estoque atualizado |
-| Administrador | excluir produtos | remover itens que não são mais utilizados |
-| Administrador | cadastrar preços dos produtos | garantir o controle correto dos valores |
-| Administrador | alterar preços dos produtos | atualizar os valores sempre que necessário |
-| Administrador | registrar entrada de peças | controlar o que foi adicionado ao estoque |
-| Administrador | visualizar o histórico de movimentações | acompanhar tudo o que foi registrado no sistema |
+| Administrador | gerenciar os produtos do estoque | manter os itens cadastrados, atualizados e organizados |
+| Administrador | gerenciar os preços dos produtos | garantir o controle correto e a atualização dos valores |
+| Administrador | registrar movimentações de entrada e saída de estoque | controlar o fluxo de peças e produtos da oficina |
+| Administrador | consultar o histórico de movimentações | acompanhar tudo o que foi registrado no sistema |
 | Administrador | receber alerta de estoque baixo | planejar a reposição de produtos |
-| Administrador | gerar relatório de entrada e saída | acompanhar a movimentação quantitativa das peças |
-| Administrador | gerar relatório de valores | acompanhar os valores movimentados no estoque |
+| Administrador | gerar relatórios gerenciais do estoque | acompanhar a movimentação e os valores dos produtos |
 | Funcionário | realizar login com perfil de funcionário | acessar apenas as funções permitidas para minha rotina |
-| Funcionário | consultar produtos cadastrados | localizar rapidamente as peças disponíveis |
-| Funcionário | visualizar a quantidade disponível de um produto | saber se há item suficiente para uso |
-| Funcionário | remover unidade de produto do estoque | registrar a utilização da peça no serviço realizado |
-| Funcionário | criar ficha do carro | associar os itens utilizados a um veículo atendido |
-| Funcionário | consultar ficha do carro | verificar os registros vinculados ao atendimento |
+| Funcionário | consultar produtos cadastrados e quantidade disponível | localizar rapidamente as peças disponíveis para uso |
+| Funcionário | registrar a saída de produtos do estoque | informar a utilização da peça no serviço realizado |
+| Funcionário | gerenciar a ficha do carro | associar os itens utilizados a um veículo atendido |
 
 ---
 
@@ -66,22 +61,16 @@ A técnica foi aplicada da seguinte forma:
 ### Requisitos Funcionais
 
 | ID | Descrição do Requisito | Prioridade | Responsável |
-|------|-----------------------------------------|----|----|
+|----|-------------------------|------------|-------------|
 | RF-001 | Permitir que o usuário realize login no sistema conforme seu perfil de acesso | ALTA | Equipe |
-| RF-002 | Permitir que o administrador cadastre produtos no estoque | ALTA | Equipe |
-| RF-003 | Permitir que o administrador exclua produtos cadastrados | ALTA | Equipe |
-| RF-004 | Permitir que o administrador cadastre preços dos produtos | ALTA | Equipe |
-| RF-005 | Permitir que o administrador altere os preços dos produtos | ALTA | Equipe |
-| RF-006 | Permitir registrar entrada de produtos no estoque | ALTA | Equipe |
-| RF-007 | Permitir registrar saída de produtos do estoque | ALTA | Equipe |
-| RF-008 | Permitir que o funcionário remova unidade de produto do estoque | ALTA | Equipe |
-| RF-009 | Permitir consulta rápida dos produtos cadastrados | ALTA | Equipe |
-| RF-010 | Exibir a quantidade disponível de cada produto | ALTA | Equipe |
-| RF-011 | Permitir criar ficha do carro | ALTA | Equipe |
-| RF-012 | Permitir consultar ficha do carro | MÉDIA | Equipe |
-| RF-013 | Registrar histórico de movimentações de entrada e saída | ALTA | Equipe |
-| RF-014 | Emitir alerta de estoque baixo | MÉDIA | Equipe |
-| RF-015 | Gerar relatório com valores movimentados no estoque | MÉDIA | Equipe |
+| RF-002 | Permitir que o administrador gerencie os produtos do estoque, incluindo cadastro, edição e exclusão | ALTA | Equipe |
+| RF-003 | Permitir que o administrador gerencie os preços dos produtos, incluindo cadastro e alteração | ALTA | Equipe |
+| RF-004 | Permitir registrar movimentações de estoque, incluindo entrada, saída e baixa de unidade de produto | ALTA | Equipe |
+| RF-005 | Permitir consulta rápida dos produtos cadastrados e da quantidade disponível de cada item | ALTA | Equipe |
+| RF-006 | Permitir gerenciar a ficha do carro, incluindo criação e consulta dos registros | ALTA | Equipe |
+| RF-007 | Permitir registrar e consultar o histórico de movimentações de entrada e saída | ALTA | Equipe |
+| RF-008 | Permitir emitir alerta de estoque baixo para produtos com quantidade mínima | MÉDIA | Equipe |
+| RF-009 | Permitir gerar relatórios gerenciais com informações de movimentações e valores do estoque | MÉDIA | Equipe |
 
 ### Requisitos não Funcionais
 
@@ -151,20 +140,16 @@ A matriz de rastreabilidade relaciona os objetivos do sistema, as histórias de 
 |---|---|---|
 | Controlar o acesso ao sistema por perfil | Como administrador, quero realizar login com perfil administrativo para acessar as funcionalidades de gerenciamento do sistema | RF-001, RNF-004 |
 | Controlar o acesso ao sistema por perfil | Como funcionário, quero realizar login com perfil de funcionário para acessar apenas as funções permitidas para minha rotina | RF-001, RNF-004 |
-| Manter o estoque atualizado | Como administrador, quero cadastrar novos produtos para manter o estoque atualizado | RF-002 |
-| Remover itens sem uso | Como administrador, quero excluir produtos para remover itens que não são mais utilizados | RF-003 |
-| Garantir controle correto dos preços | Como administrador, quero cadastrar preços dos produtos para garantir o controle correto dos valores | RF-004 |
-| Atualizar valores sempre que necessário | Como administrador, quero alterar preços dos produtos para atualizar os valores sempre que necessário | RF-005 |
-| Registrar entrada de peças | Como administrador, quero registrar entrada de peças para controlar o que foi adicionado ao estoque | RF-006, RF-013 |
-| Registrar saída de produtos utilizados | Como funcionário, quero remover unidade de produto do estoque para registrar a utilização da peça no serviço realizado | RF-007, RF-008, RF-013 |
-| Localizar produtos rapidamente | Como funcionário, quero consultar produtos cadastrados para localizar rapidamente as peças disponíveis | RF-009 |
-| Verificar disponibilidade de item | Como funcionário, quero visualizar a quantidade disponível de um produto para saber se há item suficiente para uso | RF-010 |
-| Relacionar peças ao atendimento | Como funcionário, quero criar ficha do carro para associar os itens utilizados a um veículo atendido | RF-011 |
-| Consultar registros de atendimento | Como funcionário, quero consultar ficha do carro para verificar os registros vinculados ao atendimento | RF-012 |
-| Acompanhar histórico do estoque | Como administrador, quero visualizar o histórico de movimentações para acompanhar tudo o que foi registrado no sistema | RF-013, RNF-008 |
-| Planejar reposição de itens | Como administrador, quero receber alerta de estoque baixo para planejar a reposição de produtos | RF-014 |
-| Acompanhar movimentação financeira | Como administrador, quero gerar relatório de valores para acompanhar os valores movimentados no estoque | RF-015 |
-| Garantir usabilidade no contexto real de uso | Como funcionário, quero consultar produtos cadastrados para localizar rapidamente as peças disponíveis | RNF-001, RNF-002, RNF-003, RNF-006 |
+| Manter o cadastro de produtos organizado | Como administrador, quero gerenciar os produtos do estoque para manter os itens cadastrados, atualizados e organizados | RF-002 |
+| Garantir o controle e a atualização dos preços | Como administrador, quero gerenciar os preços dos produtos para garantir o controle correto e a atualização dos valores | RF-003 |
+| Controlar a movimentação de entrada e saída do estoque | Como administrador, quero registrar movimentações de entrada e saída de estoque para controlar o fluxo de peças e produtos da oficina | RF-004, RF-007 |
+| Consultar rapidamente os produtos e quantidades disponíveis | Como funcionário, quero consultar produtos cadastrados e quantidade disponível para localizar rapidamente as peças disponíveis para uso | RF-005 |
+| Registrar o uso de produtos nos atendimentos | Como funcionário, quero registrar a saída de produtos do estoque para informar a utilização da peça no serviço realizado | RF-004, RF-007 |
+| Relacionar peças e serviços realizados | Como funcionário, quero gerenciar a ficha do carro para associar os itens utilizados a um veículo atendido | RF-006 |
+| Acompanhar o histórico de movimentações | Como administrador, quero consultar o histórico de movimentações para acompanhar tudo o que foi registrado no sistema | RF-007, RNF-008 |
+| Planejar a reposição de itens | Como administrador, quero receber alerta de estoque baixo para planejar a reposição de produtos | RF-008 |
+| Acompanhar indicadores quantitativos e financeiros do estoque | Como administrador, quero gerar relatórios gerenciais do estoque para acompanhar a movimentação e os valores dos produtos | RF-009 |
+| Garantir usabilidade no contexto real de uso | Como funcionário, quero consultar produtos cadastrados e quantidade disponível para localizar rapidamente as peças disponíveis para uso | RNF-001, RNF-002, RNF-003, RNF-006 |
 
 ---
 
