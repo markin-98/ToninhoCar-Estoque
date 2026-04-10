@@ -9,7 +9,7 @@ Visão geral da interação do usuário pelas telas do sistema e protótipo inte
 
 ## Diagrama de Fluxo
 
-<img width="3114" height="2193" alt="Diagrama de Fluxo - Toninho drawio" src="https://github.com/user-attachments/assets/1e2eb5b2-3d67-468e-bdc1-2558e703d4f0" />
+<img width="3028" height="1049" alt="Diagrama de Fluxo - Toninho drawio" src="https://github.com/user-attachments/assets/bde1490a-8301-4262-b156-853ac20f7bba" />
 
 ## Wireframes
 
