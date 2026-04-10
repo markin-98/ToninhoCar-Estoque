@@ -1,8 +1,8 @@
 # Especificações do Projeto
 
-Esta seção apresenta a especificação do projeto **Toninho Car Estoque** com foco na forma como os usuários irão interagir com a aplicação no contexto real da mecânica. A partir das necessidades levantadas junto ao cliente, foram definidos os perfis de usuários, as histórias de usuário, os requisitos funcionais e não funcionais, as restrições do projeto, o diagrama de casos de uso, a matriz de rastreabilidade e os elementos básicos de gerenciamento do projeto.
+Esta seção apresenta a especificação do projeto **Toninho Car Estoque**, considerando a forma como os usuários irão interagir com a aplicação no contexto real da mecânica. A partir das necessidades levantadas junto ao cliente, foram definidos os perfis de usuários, as histórias de usuário, os requisitos funcionais e não funcionais, as restrições do projeto, o diagrama de casos de uso, a matriz de rastreabilidade e os elementos de apoio ao gerenciamento do projeto.
 
-O sistema será desenvolvido como uma aplicação mobile voltada para o controle de estoque da mecânica **Toninho Car**, permitindo o cadastro e exclusão de produtos, controle de preços, registro de entrada e saída de peças, consulta rápida de itens, preenchimento da ficha do carro, histórico de movimentações, alerta de estoque baixo e geração de relatórios.
+O sistema será desenvolvido como uma aplicação mobile voltada para o controle de estoque da mecânica **Toninho Car**, permitindo gerenciar produtos, controlar preços, registrar movimentações de entrada e saída, consultar itens e quantidades, preencher ficha do carro, acompanhar histórico de movimentações, receber alertas de estoque baixo e gerar relatórios gerenciais.
 
 Para a elaboração desta especificação, foram utilizadas as seguintes técnicas e ferramentas:
 - levantamento de requisitos por meio de conversa direta com o cliente;
@@ -19,13 +19,13 @@ Para a elaboração desta especificação, foram utilizadas as seguintes técnic
 ## Personas
 
 ### Persona 1 – Antônio
-Antônio tem 42 anos, é o dono da mecânica **Toninho Car** e acompanha diretamente a rotina do negócio, desde o atendimento até a organização interna da oficina. Ele precisa de uma aplicação simples e confiável para controlar os produtos cadastrados, atualizar preços, registrar entradas e saídas e consultar relatórios, pois deseja manter o estoque organizado e ter mais segurança nas informações utilizadas na gestão da mecânica.
+Antônio tem 42 anos, é o dono da mecânica **Toninho Car** e acompanha diretamente a rotina do negócio, desde o atendimento até a organização interna da oficina. Ele precisa de uma aplicação simples e confiável para controlar os produtos cadastrados, atualizar preços, registrar movimentações do estoque, consultar relatórios e manter a oficina mais organizada, pois busca maior controle e segurança nas informações utilizadas na gestão do negócio.
 
 ### Persona 2 – Carol
-Carol tem 31 anos e atua no setor administrativo da mecânica, auxiliando no controle interno e na conferência das informações do estoque. Ela precisa acessar dados organizados, acompanhar preços, consultar produtos e verificar movimentações, pois sua função exige apoio à administração e maior clareza no acompanhamento das informações registradas no sistema.
+Carol tem 31 anos e atua no setor administrativo da mecânica, auxiliando no controle interno e na conferência das informações do estoque. Ela precisa acessar dados organizados, acompanhar preços, consultar produtos e verificar movimentações, pois sua função exige apoio constante à administração e maior clareza no acompanhamento das informações registradas no sistema.
 
 ### Persona 3 – Antoni
-Antoni tem 27 anos e trabalha como funcionário da oficina, participando da rotina operacional dos serviços realizados nos veículos. Ele precisa consultar produtos com rapidez, verificar a quantidade disponível, remover unidades do estoque e preencher a ficha do carro, pois utiliza peças durante os atendimentos e precisa registrar essas informações sem atrapalhar o andamento do trabalho.
+Antoni tem 27 anos e trabalha como funcionário da oficina, participando da rotina operacional dos serviços realizados nos veículos. Ele precisa consultar produtos com rapidez, verificar a quantidade disponível, registrar a saída de itens e preencher a ficha do carro, pois utiliza peças durante os atendimentos e precisa registrar essas informações sem comprometer o andamento do trabalho.
 
 ---
 
@@ -61,7 +61,7 @@ A técnica foi aplicada da seguinte forma:
 ### Requisitos Funcionais
 
 | ID | Descrição do Requisito | Prioridade | Responsável |
-|--------|-------------------------|------------|-------------|
+|----|-------------------------|------------|-------------|
 | RF-001 | Permitir que o usuário realize login no sistema conforme seu perfil de acesso | ALTA | Equipe |
 | RF-002 | Permitir que o administrador gerencie os produtos do estoque, incluindo cadastro, edição e exclusão | ALTA | Equipe |
 | RF-003 | Permitir que o administrador gerencie os preços dos produtos, incluindo cadastro e alteração | ALTA | Equipe |
@@ -75,7 +75,7 @@ A técnica foi aplicada da seguinte forma:
 ### Requisitos não Funcionais
 
 | ID | Descrição do Requisito | Prioridade |
-|-------|-------------------------|----|
+|----|-------------------------|------------|
 | RNF-001 | O sistema deve ser responsivo para rodar em dispositivos móveis | ALTA |
 | RNF-002 | O sistema deve possuir interface simples, intuitiva e adequada ao ambiente de oficina | ALTA |
 | RNF-003 | O sistema deve processar as principais requisições do usuário em no máximo 3 segundos | MÉDIA |
@@ -105,30 +105,25 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 
 ## Diagrama de Casos de Uso
 
-O diagrama de casos de uso representa as interações entre os atores do sistema e as funcionalidades centrais da aplicação **Toninho Car Estoque**. Foram identificados dois atores principais: **Administrador** e **Funcionário**, cada um com permissões específicas de acordo com sua responsabilidade dentro da mecânica.
+O diagrama de casos de uso representa as interações entre os atores do sistema e as principais funcionalidades da aplicação **Toninho Car Estoque**. Foram identificados dois atores centrais, **Administrador** e **Funcionário**, cada um com permissões específicas de acordo com sua responsabilidade dentro da mecânica.
 
-![Diagrama de Caso de Uso](img/caso_uso_toninho_car_estoque.png)
+![Diagrama de Caso de Uso](img/caso_uso_toninho_car_estoque_v2.png)
 
 ### Descrição sucinta dos atores e casos de uso
 
 | Ator / Caso de Uso | Descrição |
 |---|---|
-| Administrador | Usuário responsável pelo gerenciamento do estoque, cadastro de produtos, controle de preços e relatórios |
-| Funcionário | Usuário responsável pelas operações de consulta, retirada de peças e preenchimento da ficha do carro |
+| Administrador | Usuário responsável pelo gerenciamento do estoque, controle de produtos, preços, movimentações e relatórios |
+| Funcionário | Usuário responsável pelas operações de consulta, registro de saída de produtos e preenchimento da ficha do carro |
 | Realizar login | Permite acesso ao sistema com autenticação e controle de perfil |
-| Cadastrar produto | Permite incluir novos itens no estoque |
-| Excluir produto | Permite remover itens que não serão mais utilizados |
-| Cadastrar preço | Permite informar o valor inicial do produto |
-| Alterar preço | Permite atualizar o valor de um produto já cadastrado |
-| Registrar entrada de estoque | Permite lançar novos produtos ou reposições no estoque |
-| Registrar saída de estoque | Permite registrar a retirada de itens do estoque |
-| Consultar produtos | Permite pesquisar e visualizar produtos cadastrados |
-| Visualizar quantidade disponível | Permite verificar o saldo atual de cada item |
-| Criar ficha do carro | Permite registrar veículo e itens utilizados em determinado serviço |
-| Consultar ficha do carro | Permite visualizar fichas já registradas |
-| Visualizar histórico de movimentações | Permite rastrear entradas e saídas registradas |
-| Receber alerta de estoque baixo | Permite identificar necessidade de reposição |
-| Gerar relatório de valores | Permite acompanhar financeiramente os itens movimentados |
+| Gerenciar produtos do estoque | Permite cadastrar, editar e excluir produtos do estoque |
+| Gerenciar preços dos produtos | Permite cadastrar e alterar os preços dos produtos |
+| Registrar movimentações de estoque | Permite registrar entradas, saídas e baixas de produtos no estoque |
+| Consultar produtos e quantidade disponível | Permite pesquisar produtos cadastrados e verificar a quantidade disponível de cada item |
+| Gerenciar ficha do carro | Permite criar e consultar registros vinculados aos veículos atendidos |
+| Consultar histórico de movimentações | Permite acompanhar e rastrear entradas e saídas registradas no sistema |
+| Receber alerta de estoque baixo | Permite identificar produtos com necessidade de reposição |
+| Gerar relatórios gerenciais | Permite acompanhar informações de movimentações e valores do estoque |
 
 ---
 
