@@ -1,110 +1,91 @@
 # Plano de Testes de Usabilidade
 
-O Plano de Testes de Usabilidade do projeto **Toninho Car Estoque** tem como objetivo avaliar se a interface da aplicação é fácil de entender, simples de utilizar e adequada à rotina da mecânica. O foco principal dos testes será verificar se os usuários conseguem executar as funções mais importantes do sistema com clareza, agilidade e baixo índice de erro.
+O Plano de Testes de Usabilidade do projeto **Toninho Car Estoque** tem como objetivo avaliar se a interface do aplicativo é clara, intuitiva e adequada à rotina da mecânica. Os testes serão aplicados com base nas telas já prototipadas do sistema, buscando verificar se os usuários conseguem navegar, localizar informações e executar tarefas sem dificuldade excessiva.
 
-Os testes serão realizados com base nas funcionalidades centrais da aplicação, considerando os dois perfis principais de uso do sistema: **Administrador** e **Funcionário**. A avaliação será voltada para a experiência de uso em ambiente mobile, observando aspectos como facilidade de navegação, entendimento dos botões, clareza das informações exibidas, tempo para realização das tarefas e dificuldades encontradas durante a interação com o sistema.
+A avaliação será feita considerando os dois perfis principais do sistema, **Administrador** e **Funcionário**, observando especialmente a facilidade de uso das telas de login, dashboard, produtos, movimentação de estoque, fichas de veículo e cadastro de produtos.
 
 ## Objetivos dos testes
 
-Os testes de usabilidade possuem os seguintes objetivos:
-
-- verificar se os usuários conseguem compreender a interface sem necessidade de explicações excessivas;
-- avaliar se as funções principais do sistema podem ser executadas com facilidade;
-- identificar dificuldades de navegação, interpretação ou preenchimento de dados;
-- medir a eficiência das tarefas principais do aplicativo;
-- levantar sugestões de melhoria na interface e no fluxo de uso.
+- verificar se os usuários entendem facilmente a navegação do aplicativo;
+- avaliar se as telas apresentam informações claras e bem organizadas;
+- identificar dificuldades no uso das funções principais;
+- analisar se os usuários conseguem concluir as tarefas com agilidade;
+- levantar melhorias para a interface e para o fluxo de uso.
 
 ## Escopo dos testes
 
-Os testes de usabilidade abrangerão as principais funcionalidades do sistema **Toninho Car Estoque**, especialmente aquelas ligadas à rotina da mecânica:
+Os testes de usabilidade irão abranger as seguintes telas e funcionalidades do sistema:
 
-- realização de login;
-- consulta de produtos e quantidades disponíveis;
-- gerenciamento de produtos;
-- gerenciamento de preços;
-- registro de movimentações de estoque;
-- gerenciamento da ficha do carro;
-- consulta ao histórico de movimentações;
-- verificação de alertas de estoque baixo;
-- visualização de relatórios gerenciais.
+- tela de login;
+- dashboard inicial;
+- consulta de produtos;
+- cadastro de produto;
+- edição de produto;
+- movimentação de estoque;
+- consulta de fichas;
+- criação de ficha do carro;
+- visualização do detalhe da ficha do carro.
 
 ## Perfis dos participantes
 
-Os testes serão realizados com usuários que representem os perfis reais de uso do sistema:
-
 | Perfil | Descrição |
 |---|---|
-| Administrador | Usuário responsável pela gestão do estoque, cadastro de produtos, preços e relatórios |
-| Funcionário | Usuário responsável pela consulta de produtos, saída de itens e preenchimento da ficha do carro |
+| Administrador | Usuário responsável por cadastrar produtos, editar preços, acompanhar estoque e visualizar informações gerenciais |
+| Funcionário | Usuário responsável por consultar produtos, registrar movimentações e preencher fichas de veículos |
 
 ## Quantidade de participantes
 
-Serão convidados entre **3 e 5 participantes**, buscando representar os perfis mais próximos do uso real do sistema. A escolha desse número visa permitir observação qualitativa suficiente para identificar problemas de usabilidade sem tornar o processo excessivamente complexo.
-
-## Ambiente de teste
-
-Os testes serão realizados em ambiente controlado, utilizando dispositivo móvel compatível com a proposta da aplicação. O ambiente deve permitir ao participante executar as tarefas com tranquilidade, sem interrupções externas que prejudiquem a observação.
-
-| Item | Descrição |
-|---|---|
-| Dispositivo | Smartphone ou ambiente simulando uso mobile |
-| Conexão | Internet estável, quando necessário |
-| Local | Ambiente silencioso e controlado |
-| Registro | Observação do avaliador e anotações das dificuldades encontradas |
+Serão considerados entre **4 e 5 participantes**, distribuídos entre os perfis de administrador e funcionário, para permitir uma avaliação prática das principais interações do sistema.
 
 ## Critérios de avaliação
 
-Durante os testes, serão observados os seguintes critérios:
+Durante os testes, serão observados os seguintes aspectos:
 
-- facilidade de aprendizado;
-- clareza dos elementos da interface;
-- tempo gasto para concluir cada tarefa;
-- quantidade de erros cometidos;
-- necessidade de ajuda externa;
-- satisfação do usuário ao final do teste.
+- facilidade para entender a tela de login e escolher o perfil correto;
+- clareza das informações do dashboard;
+- facilidade para localizar produtos;
+- facilidade para registrar entrada ou saída de item;
+- compreensão dos formulários de cadastro e edição;
+- facilidade para criar e consultar fichas de veículos;
+- percepção geral sobre organização visual e navegação.
 
 ## Métricas de usabilidade
-
-As seguintes métricas serão utilizadas para avaliar os resultados:
 
 | Métrica | Descrição |
 |---|---|
 | Taxa de sucesso | Percentual de tarefas concluídas corretamente |
-| Tempo de execução | Tempo necessário para completar cada tarefa |
-| Número de erros | Quantidade de erros cometidos durante a execução |
-| Necessidade de ajuda | Quantidade de vezes em que o participante precisou de orientação |
-| Satisfação do usuário | Percepção geral do participante sobre facilidade e clareza do sistema |
+| Tempo de execução | Tempo necessário para realizar cada tarefa |
+| Quantidade de erros | Número de erros cometidos pelo usuário |
+| Necessidade de ajuda | Quantidade de vezes em que o usuário precisou de orientação |
+| Satisfação | Avaliação subjetiva sobre facilidade de uso |
 
 ## Casos de teste de usabilidade
 
-| ID | Funcionalidade | Tarefa do usuário | Resultado esperado |
+| ID | Tela / Funcionalidade | Tarefa do usuário | Resultado esperado |
 |---|---|---|---|
-| TU-01 | Login | Acessar o sistema com seu perfil | O usuário deve conseguir entrar no sistema sem dificuldade |
-| TU-02 | Consulta de produtos | Localizar um produto e verificar sua quantidade disponível | O usuário deve encontrar o item rapidamente e compreender as informações exibidas |
-| TU-03 | Gerenciamento de produtos | Cadastrar ou editar um produto no sistema | O administrador deve conseguir realizar o cadastro ou alteração com clareza |
-| TU-04 | Gerenciamento de preços | Cadastrar ou alterar o preço de um produto | O administrador deve conseguir atualizar o valor corretamente |
-| TU-05 | Movimentação de estoque | Registrar entrada ou saída de produto | O usuário deve concluir a movimentação sem erros |
-| TU-06 | Ficha do carro | Criar ou consultar a ficha de um veículo | O funcionário deve conseguir relacionar os itens ao veículo atendido |
-| TU-07 | Histórico | Consultar o histórico de movimentações | O administrador deve localizar as informações com facilidade |
-| TU-08 | Alerta de estoque baixo | Identificar item com necessidade de reposição | O administrador deve compreender rapidamente o alerta apresentado |
-| TU-09 | Relatórios | Visualizar relatório gerencial do estoque | O administrador deve interpretar as informações do relatório com clareza |
+| TU-01 | Login | Selecionar o perfil correto e entrar no sistema | O usuário deve acessar o sistema sem dificuldade |
+| TU-02 | Dashboard | Identificar total de produtos, estoque baixo e valor total | O usuário deve compreender rapidamente os indicadores exibidos |
+| TU-03 | Produtos | Localizar um produto na lista | O usuário deve encontrar o item com facilidade |
+| TU-04 | Cadastro de produto | Cadastrar um novo produto | O administrador deve preencher o formulário corretamente |
+| TU-05 | Edição de produto | Editar um produto existente | O administrador deve alterar os dados sem dificuldade |
+| TU-06 | Movimentação | Registrar entrada ou saída de item | O usuário deve concluir a movimentação corretamente |
+| TU-07 | Fichas | Localizar uma ficha de carro existente | O usuário deve encontrar a ficha com rapidez |
+| TU-08 | Criar ficha | Cadastrar uma nova ficha de veículo | O usuário deve preencher os dados corretamente |
+| TU-09 | Detalhe da ficha | Consultar itens e informações da ficha do carro | O usuário deve entender os dados exibidos sem dificuldade |
 
 ## Procedimento de execução
 
-A aplicação dos testes seguirá as etapas abaixo:
-
-1. apresentar brevemente o objetivo do teste ao participante;
-2. informar que o sistema está em avaliação e que o foco é a interface, não o desempenho pessoal do usuário;
-3. solicitar que o participante execute as tarefas definidas;
-4. observar a navegação, registrar dúvidas, erros, hesitações e comentários;
-5. coletar a percepção final do participante sobre a experiência de uso.
+1. apresentar ao participante o objetivo do teste;
+2. informar que o foco da avaliação está na interface do sistema;
+3. solicitar a execução das tarefas previstas;
+4. observar dificuldades, dúvidas, erros e tempo de execução;
+5. registrar comentários e sugestões ao final do uso.
 
 ## Critérios de sucesso
 
 Os testes serão considerados satisfatórios quando:
-
-- a maioria dos participantes conseguir concluir as tarefas principais;
-- o tempo de execução estiver dentro de um nível aceitável para uso cotidiano;
-- a quantidade de erros for baixa;
-- os participantes relatarem facilidade de entendimento e navegação;
-- os problemas identificados puderem ser corrigidos com ajustes de interface e fluxo.
+- a maioria dos participantes conseguir concluir as tarefas propostas;
+- a navegação ocorrer com poucas dúvidas;
+- os formulários forem compreendidos com facilidade;
+- as informações das telas forem interpretadas corretamente;
+- os problemas encontrados forem pontuais e corrigíveis com ajustes simples.
