@@ -107,8 +107,8 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 
 O diagrama de casos de uso representa as interações entre os atores do sistema e as principais funcionalidades da aplicação **Toninho Car Estoque**. Foram identificados dois atores centrais, **Administrador** e **Funcionário**, cada um com permissões específicas de acordo com sua responsabilidade dentro da mecânica.
 
-![Diagrama de Caso de Uso](<img width="2600" height="2200" alt="diagrama_caso_uso_ToninhoCar" src="https://github.com/user-attachments/assets/a8a28465-6892-4138-ae99-89f0f802de94" />
-)
+![Diagrama de Caso de Uso]<img width="2600" height="2200" alt="diagrama_caso_uso_ToninhoCar" src="https://github.com/user-attachments/assets/96afe22b-2695-4ad4-8c27-ce2e3ce12c34" />
+
 
 ### Descrição sucinta dos atores e casos de uso
 
