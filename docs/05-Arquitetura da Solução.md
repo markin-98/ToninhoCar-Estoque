@@ -16,15 +16,11 @@ Definição de como o software é estruturado em termos dos componentes que faze
 
 ## Esquema Relacional
 
-O Esquema Relacional corresponde à representação dos dados em tabelas juntamente com as restrições de integridade e chave primária.
- 
-As referências abaixo irão auxiliá-lo na geração do artefato “Esquema Relacional”.
-
-> - [Criando um modelo relacional - Documentação da IBM](https://www.ibm.com /docs/pt-br/cognos-analytics/10.2.2?topic=designer-creating-relational-model)
+<img width="862" height="551" alt="Esquema Relacional drawio" src="https://github.com/user-attachments/assets/4bd7c43a-2836-4c0c-8b26-11f04744e9b7" />
 
 ## Modelo Físico
 
-Entregar um arquivo banco.sql contendo os scripts de criação das tabelas do banco de dados. Este arquivo deverá ser incluído dentro da pasta src\bd.
+Arquivo banco.sql contendo os scripts de criação das tabelas do banco de dados incluído dentro da pasta src\bd.
 
 ## Tecnologias Utilizadas
 
