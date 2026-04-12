@@ -1,10 +1,65 @@
 # Arquitetura da Solução
 
-<span style="color:red">Pré-requisitos: <a href="3-Projeto de Interface.md"> Projeto de Interface</a></span>
+# ToninhoCar Estoque - Estrutura de Software e Ambiente de Hospedagem
 
-Definição de como o software é estruturado em termos dos componentes que fazem parte da solução e do ambiente de hospedagem da aplicação.
+## 1. Componentes da Solução (Arquitetura de Software)
 
-![Arquitetura da Solução](img/02-mob-arch.png)
+### 1.1 Camada de Apresentação (Front-end)
+- **Tela de Login**: usuário, senha, perfil (Funcionário/Administrador)
+- **Menu Principal** (diferenciado por perfil)
+- **Formulários de Gestão**:
+  - Adicionar/Editar Produto (nome, quantidade, preço, quantidade mínima)
+  - Registro de Movimentações (entradas/saídas, vinculadas a fichas de carro)
+  - Consulta de produtos e estoque
+  - Ficha do Carro (placa, proprietário, produtos associados)
+- **Relatórios Gerenciais** (apenas Administrador)
+
+### 1.2 Camada de Lógica de Negócios (Back-end)
+- **Autenticação e Perfis**: verificação de credenciais, redirecionamento por perfil
+- **Gerenciamento de Produtos**: CRUD completo, controle de quantidade mínima e preço
+- **Controle de Estoque**: registro de entradas (quantidade inicial) e saídas (por ficha de carro)
+- **Gestão de Fichas de Carro**: associação placa ↔ proprietário ↔ produtos retirados/inseridos, com datas
+- **Geração de Relatórios**: movimentações recentes, valor total por ficha, histórico por período
+
+### 1.3 Camada de Dados (Persistência)
+- **Tabela de Usuários**: id, nome, login, senha (hash), perfil
+- **Tabela de Produtos**: id, nome, quantidade atual, preço unitário, quantidade mínima, data última movimentação
+- **Tabela de Movimentações**: id, id_produto, tipo (entrada/saída), quantidade, data, valor_unitário, valor_total, id_ficha
+- **Tabela de Fichas de Carro**: id, placa, nome_proprietário, data_criação
+- **Tabela de Logs** (opcional): auditoria de ações
+
+## 2. Ambiente de Hospedagem da Aplicação
+
+Infraestrutura web (nuvem ou servidor dedicado) com foco em múltiplos acessos simultâneos.
+
+### 2.1 Infraestrutura Mínima Recomendada
+
+| Componente            | Tecnologia / Configuração                              |
+|-----------------------|--------------------------------------------------------|
+| **Servidor Web**      | Apache ou Nginx (Linux)                               |
+| **Back-end**          | PHP 8.x (ou Node.js/Java)                             |
+| **Banco de Dados**    | MySQL 8.0 ou PostgreSQL 14+                           |
+| **Sistema Operacional** | Linux Ubuntu 22.04 LTS (ou Windows Server 2019+)     |
+| **Front-end**         | HTML5, CSS3, JavaScript (React/Vue opcional)          |
+
+### 2.2 Requisitos de Rede e Segurança
+- **Protocolo**: HTTPS obrigatório (certificado SSL/TLS)
+- **Portas**: 80/443 liberadas; porta do BD (ex.: 3306) restrita ao servidor
+- **Autenticação**: Sessão com token JWT ou cookies seguros; diferenciação de perfil no back-end
+- **Backup**: Diário do banco de dados, armazenamento externo
+
+### 2.3 Modelo de Hospedagem (Sugestão)
+- **Nuvem pública**: AWS EC2 (t3.micro) + RDS (db.t3.micro) ou equivalente (Azure/Google Cloud)
+- **On-premise**: Servidor local com acesso via rede interna (VPN para acesso remoto, se necessário)
+
+## 3. Conformidade com os Artefatos Fornecidos
+
+- O **Diagrama de Fluxo** confirma a separação de funcionalidades por perfil:  
+  *Funcionário* → consulta, saídas, fichas; *Administrador* → gerência de produtos/preços, entradas, relatórios.
+- As **Telas** detalham os dados que cada componente da apresentação deve coletar (placa, nome do produto, quantidade mínima) e exibir (movimentações recentes, valor total, estoque atual).
+- O ambiente de hospedagem suporta a persistência e a lógica descritas, permitindo múltiplos acessos simultâneos e armazenamento histórico.
+
+**Conclusão**: O software **ToninhoCar Estoque** é estruturado como uma aplicação web de três camadas, com componentes de autenticação, gestão de produtos, movimentações e fichas de carro, hospedada em servidor Linux com banco de dados relacional, garantindo controle de acesso por perfil e disponibilidade para uso interno ou remoto.
 
 ## Diagrama de Classes
 
