@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS USUARIO (
     id_usuario INT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(120) NOT NULL,
+    
     email VARCHAR(150) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
     perfil ENUM('admin', 'funcionario') NOT NULL,
