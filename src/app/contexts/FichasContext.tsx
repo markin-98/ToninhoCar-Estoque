@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { FichaCarro, ItemFicha, StatusFicha } from '@/types';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import { FichaCarro, ItemFicha } from '@/types';
 
 type NovaFicha = Omit<FichaCarro, 'id' | 'data_atendimento' | 'status' | 'itens'>;
 
@@ -13,73 +14,76 @@ type FichasContextData = {
   removerItem: (id_ficha: number, id_item: number) => void;
 };
 
-// Fichas mockadas para desenvolvimento — substituir por chamadas ao Supabase
-const FICHAS_INICIAIS: FichaCarro[] = [
-  {
-    id: 1,
-    placa: 'HYD-0001',
-    modelo: 'Volkswagen Golf 1.4',
-    ano: 2021,
-    nome_cliente: 'João Silva',
-    data_atendimento: '2026-05-09T10:00:00',
-    observacoes: 'Revisão completa + troca de pastilhas',
-    status: 'aberta',
-    itens: [
-      { id: 1, id_produto: 4, nome_produto: 'Pastilha de Freio', quantidade: 2, preco_unitario: 120.0 },
-      { id: 2, id_produto: 5, nome_produto: 'Fluido de Freio DOT4', quantidade: 1, preco_unitario: 22.0 },
-    ],
-  },
-  {
-    id: 2,
-    placa: 'ABC-9876',
-    modelo: 'Toyota Corolla 2.0',
-    ano: 2019,
-    nome_cliente: 'Maria Santos',
-    data_atendimento: '2026-05-08T14:30:00',
-    observacoes: '',
-    status: 'concluida',
-    itens: [
-      { id: 3, id_produto: 1, nome_produto: 'Óleo Motor 5W30', quantidade: 1, preco_unitario: 45.9 },
-      { id: 4, id_produto: 2, nome_produto: 'Filtro de Ar', quantidade: 1, preco_unitario: 35.0 },
-    ],
-  },
-  {
-    id: 3,
-    placa: 'XYZ-5432',
-    modelo: 'Honda Civic 1.5T',
-    ano: 2022,
-    nome_cliente: 'Pedro Oliveira',
-    data_atendimento: '2026-05-10T09:00:00',
-    observacoes: 'Cliente reportou barulho no motor',
-    status: 'aberta',
-    itens: [],
-  },
-];
+type FichaRow = {
+  id_ficha: number;
+  placa: string;
+  modelo: string;
+  ano: number | null;
+  nome_cliente: string;
+  data_atendimento: string;
+  observacoes: string | null;
+  status: string;
+  itens: ItemFicha[] | null;
+};
+
+function mapRow(row: FichaRow): FichaCarro {
+  return {
+    id: row.id_ficha,
+    placa: row.placa,
+    modelo: row.modelo,
+    ano: row.ano,
+    nome_cliente: row.nome_cliente,
+    data_atendimento: row.data_atendimento,
+    observacoes: row.observacoes ?? '',
+    status: row.status as FichaCarro['status'],
+    itens: Array.isArray(row.itens) ? row.itens : [],
+  };
+}
 
 const FichasContext = createContext<FichasContextData>({} as FichasContextData);
 
 export function FichasProvider({ children }: { children: ReactNode }) {
-  const [fichas, setFichas] = useState<FichaCarro[]>(FICHAS_INICIAIS);
+  const [fichas, setFichas] = useState<FichaCarro[]>([]);
+
+  async function carregar() {
+    const { data } = await supabase
+      .from('ficha_carro')
+      .select('*')
+      .order('data_atendimento', { ascending: false });
+    if (data) setFichas((data as FichaRow[]).map(mapRow));
+  }
+
+  useEffect(() => { carregar(); }, []);
 
   function criarFicha(data: NovaFicha): number {
-    const id = Date.now();
+    const idTemp = Date.now();
     const nova: FichaCarro = {
       ...data,
-      id,
+      id: idTemp,
       data_atendimento: new Date().toISOString(),
       status: 'aberta',
       itens: [],
     };
     setFichas((prev) => [nova, ...prev]);
-    return id;
+    supabase.from('ficha_carro').insert({
+      placa: data.placa,
+      modelo: data.modelo,
+      ano: data.ano,
+      nome_cliente: data.nome_cliente,
+      observacoes: data.observacoes,
+      itens: [],
+    }).then(() => carregar());
+    return idTemp;
   }
 
   function atualizarFicha(id: number, data: Partial<Pick<FichaCarro, 'status' | 'observacoes'>>) {
     setFichas((prev) => prev.map((f) => (f.id === id ? { ...f, ...data } : f)));
+    supabase.from('ficha_carro').update(data).eq('id_ficha', id);
   }
 
   function excluirFicha(id: number) {
     setFichas((prev) => prev.filter((f) => f.id !== id));
+    supabase.from('ficha_carro').delete().eq('id_ficha', id);
   }
 
   function buscarPorId(id: number) {
@@ -88,21 +92,23 @@ export function FichasProvider({ children }: { children: ReactNode }) {
 
   function adicionarItem(id_ficha: number, item: Omit<ItemFicha, 'id'>) {
     setFichas((prev) =>
-      prev.map((f) =>
-        f.id === id_ficha
-          ? { ...f, itens: [...f.itens, { ...item, id: Date.now() }] }
-          : f,
-      ),
+      prev.map((f) => {
+        if (f.id !== id_ficha) return f;
+        const novosItens = [...f.itens, { ...item, id: Date.now() }];
+        supabase.from('ficha_carro').update({ itens: novosItens }).eq('id_ficha', id_ficha);
+        return { ...f, itens: novosItens };
+      }),
     );
   }
 
   function removerItem(id_ficha: number, id_item: number) {
     setFichas((prev) =>
-      prev.map((f) =>
-        f.id === id_ficha
-          ? { ...f, itens: f.itens.filter((i) => i.id !== id_item) }
-          : f,
-      ),
+      prev.map((f) => {
+        if (f.id !== id_ficha) return f;
+        const novosItens = f.itens.filter((i) => i.id !== id_item);
+        supabase.from('ficha_carro').update({ itens: novosItens }).eq('id_ficha', id_ficha);
+        return { ...f, itens: novosItens };
+      }),
     );
   }
 

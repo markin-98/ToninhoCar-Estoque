@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type Perfil = 'admin' | 'funcionario';
 
@@ -15,37 +16,43 @@ type AuthContextData = {
   logout: () => void;
 };
 
-// Usuários mockados — substituir pelas chamadas ao Supabase quando o backend estiver pronto
-const USUARIOS_MOCK = [
-  { nome: 'Admin Toninho', email: 'admin@toninho.com', senha: '123456', perfil: 'admin' as Perfil },
-  { nome: 'José Funcionário', email: 'func@toninho.com', senha: '123456', perfil: 'funcionario' as Perfil },
-];
-
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+
+function mapearUsuario(user: { email?: string; user_metadata?: Record<string, string> }): Usuario {
+  const meta = user.user_metadata ?? {};
+  return {
+    nome: meta.nome ?? user.email?.split('@')[0] ?? 'Usuário',
+    email: user.email ?? '',
+    perfil: meta.perfil === 'admin' ? 'admin' : 'funcionario',
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [carregando, setCarregando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setUsuario(mapearUsuario(session.user));
+      setCarregando(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUsuario(session?.user ? mapearUsuario(session.user) : null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   async function login(email: string, senha: string): Promise<void> {
     setCarregando(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const encontrado = USUARIOS_MOCK.find(
-      (u) => u.email === email.toLowerCase().trim() && u.senha === senha,
-    );
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     setCarregando(false);
-
-    if (!encontrado) {
-      throw new Error('Email ou senha inválidos.');
-    }
-
-    setUsuario({ nome: encontrado.nome, email: encontrado.email, perfil: encontrado.perfil });
+    if (error) throw new Error('Email ou senha inválidos.');
   }
 
   function logout() {
+    supabase.auth.signOut();
     setUsuario(null);
   }
 

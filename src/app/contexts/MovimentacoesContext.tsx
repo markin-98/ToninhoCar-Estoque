@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Movimentacao, TipoMovimentacao } from '@/types';
 
 type NovaMovimentacao = Omit<Movimentacao, 'id'>;
@@ -8,61 +9,57 @@ type MovimentacoesContextData = {
   registrarMovimentacao: (data: NovaMovimentacao) => void;
 };
 
-// Histórico mockado para desenvolvimento — substituir por chamadas ao Supabase
-const MOVIMENTACOES_INICIAIS: Movimentacao[] = [
-  {
-    id: 1,
-    id_produto: 4,
-    nome_produto: 'Pastilha de Freio',
-    tipo: 'saida',
-    quantidade: 2,
-    nome_usuario: 'José Funcionário',
-    data_hora: '2026-05-10T14:30:00',
-    motivo: 'Substituição veículo ABC-1234',
-  },
-  {
-    id: 2,
-    id_produto: 2,
-    nome_produto: 'Filtro de Ar',
-    tipo: 'entrada',
-    quantidade: 5,
-    nome_usuario: 'Admin Toninho',
-    data_hora: '2026-05-10T11:00:00',
-    motivo: 'Reposição de estoque',
-  },
-  {
-    id: 3,
-    id_produto: 3,
-    nome_produto: 'Vela de Ignição',
-    tipo: 'baixa',
-    quantidade: 3,
-    nome_usuario: 'José Funcionário',
-    data_hora: '2026-05-09T16:45:00',
-    motivo: 'Peças danificadas na entrega',
-  },
-  {
-    id: 4,
-    id_produto: 1,
-    nome_produto: 'Óleo Motor 5W30',
-    tipo: 'saida',
-    quantidade: 3,
-    nome_usuario: 'José Funcionário',
-    data_hora: '2026-05-09T09:15:00',
-    motivo: 'Troca de óleo veículo XYZ-9876',
-  },
-];
+type MovimentacaoRow = {
+  id_movimentacao: number;
+  id_produto: number;
+  nome_produto: string;
+  tipo: string;
+  quantidade: number;
+  nome_usuario: string;
+  data_hora: string;
+  motivo: string | null;
+};
 
-const MovimentacoesContext = createContext<MovimentacoesContextData>(
-  {} as MovimentacoesContextData,
-);
+function mapRow(row: MovimentacaoRow): Movimentacao {
+  return {
+    id: row.id_movimentacao,
+    id_produto: row.id_produto,
+    nome_produto: row.nome_produto,
+    tipo: row.tipo as TipoMovimentacao,
+    quantidade: row.quantidade,
+    nome_usuario: row.nome_usuario,
+    data_hora: row.data_hora,
+    motivo: row.motivo ?? '',
+  };
+}
+
+const MovimentacoesContext = createContext<MovimentacoesContextData>({} as MovimentacoesContextData);
 
 export function MovimentacoesProvider({ children }: { children: ReactNode }) {
-  const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>(MOVIMENTACOES_INICIAIS);
+  const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
+
+  async function carregar() {
+    const { data } = await supabase
+      .from('movimentacao')
+      .select('*')
+      .order('data_hora', { ascending: false });
+    if (data) setMovimentacoes((data as MovimentacaoRow[]).map(mapRow));
+  }
+
+  useEffect(() => { carregar(); }, []);
 
   function registrarMovimentacao(data: NovaMovimentacao) {
     const nova: Movimentacao = { ...data, id: Date.now() };
-    // mais recente primeiro
     setMovimentacoes((prev) => [nova, ...prev]);
+    supabase.from('movimentacao').insert({
+      id_produto: data.id_produto,
+      nome_produto: data.nome_produto,
+      nome_usuario: data.nome_usuario,
+      tipo: data.tipo,
+      quantidade: data.quantidade,
+      data_hora: data.data_hora,
+      motivo: data.motivo,
+    }).then(() => carregar());
   }
 
   return (
