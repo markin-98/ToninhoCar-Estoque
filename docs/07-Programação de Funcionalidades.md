@@ -1,6 +1,6 @@
 # Programação de Funcionalidades
 
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Especificação do Projeto</a></span>, <a href="3-Projeto de Interface.md"> Projeto de Interface</a>, <a href="4-Metodologia.md"> Metodologia</a>, <a href="5-Arquitetura da Solução.md"> Arquitetura da Solução</a>
+<span style="color:red">Pré-requisitos: <a href="02-Especificação do Projeto.md"> Especificação do Projeto</a></span>, <a href="04-Projeto de Interface.md"> Projeto de Interface</a>, <a href="03-Metodologia.md"> Metodologia</a>, <a href="05-Arquitetura da Solução.md"> Arquitetura da Solução</a>
 
 Esta seção apresenta a implementação das funcionalidades do sistema **Toninho Car Estoque**, descrevendo o modelo físico do banco de dados, os scripts SQL de manipulação de dados, as telas desenvolvidas, os CRUDs implementados, o fluxo de autenticação, os padrões de codificação adotados e as evidências de funcionamento da aplicação.
 
@@ -391,45 +391,43 @@ src/app/
 
 ## 7. Evidências de Implementação das Funcionalidades de CRUD
 
-> **Instrução:** inserir abaixo os screenshots da aplicação em execução, capturados via Expo Go ou emulador. Para cada funcionalidade, adicionar a imagem correspondente com legenda.
-
 ### 7.1 CRUD de Produtos
 
 **Listagem de produtos com busca e filtros:**
 
-> _[Inserir screenshot da tela de listagem de produtos mostrando a barra de busca e os chips de filtro]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 26" src="https://github.com/user-attachments/assets/91588ffe-fb19-4080-b2d4-5ca3a1f744db" />
 
 **Cadastro de novo produto:**
 
-> _[Inserir screenshot do formulário de adição de produto preenchido]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 26 (1)" src="https://github.com/user-attachments/assets/07abec80-ddbd-4e2f-89b3-53dd9e28ce75" />
 
 **Edição e exclusão de produto:**
 
-> _[Inserir screenshot da tela de edição com os botões "Salvar Alterações" e "Excluir Produto" visíveis]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 26 (2)" src="https://github.com/user-attachments/assets/a283fd2b-f4a8-42fe-81c1-655d8b18aa0c" />
 
 ### 7.2 CRUD de Fichas de Carro
 
 **Listagem de fichas:**
 
-> _[Inserir screenshot da tela de listagem de fichas com status exibido]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 26 (3)" src="https://github.com/user-attachments/assets/921574eb-ee0c-4dcb-a355-851a1f1420ad" />
 
 **Criação de ficha:**
 
-> _[Inserir screenshot do formulário de criação de ficha preenchido]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 27" src="https://github.com/user-attachments/assets/c3f8875c-a6b4-498c-b12e-9147892e34bd" />
 
 **Detalhes da ficha com itens e valor total:**
 
-> _[Inserir screenshot da tela de detalhes da ficha mostrando os produtos utilizados e o valor total do atendimento]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 27 (1)" src="https://github.com/user-attachments/assets/eb04d6df-b21b-47c4-aa24-c832d2303183" />
 
 ### 7.3 Registro de Movimentações
 
 **Formulário de movimentação (Entrada/Saída/Baixa):**
 
-> _[Inserir screenshot da tela de movimentações com produto selecionado, quantidade preenchida e tipo ativo destacado]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 27 (2)" src="https://github.com/user-attachments/assets/ecd7c95b-9dc4-4c18-840e-bf0add0750c3" />
 
 **Histórico de movimentações:**
 
-> _[Inserir screenshot do histórico exibindo os registros com badges coloridos por tipo]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 27 (3)" src="https://github.com/user-attachments/assets/6941cb3e-76dc-4629-8e92-ffb34d71b495" />
 
 ---
 
@@ -437,19 +435,24 @@ src/app/
 
 **Tela de login:**
 
-> _[Inserir screenshot da tela de login com os campos de e-mail e senha preenchidos]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 27 (4)" src="https://github.com/user-attachments/assets/8c366b56-35e0-4bcd-9897-56dcddc8b14f" />
 
 **Redirecionamento para painel do administrador:**
 
-> _[Inserir screenshot do dashboard do administrador exibido após o login com perfil admin]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 27 (5)" src="https://github.com/user-attachments/assets/9f2ed479-94f1-437b-9529-efc74cbef516" />
+
 
 **Redirecionamento para painel do funcionário:**
 
-> _[Inserir screenshot do dashboard do funcionário exibido após o login com perfil funcionário]_
+> <img width="739" height="1600" alt="WhatsApp Image 2026-06-14 at 15 26 28" src="https://github.com/user-attachments/assets/07997e1c-5291-48ee-bb74-538b2bb3d664" />
 
 **Separação de acesso por perfil:**
 
-> _[Inserir screenshot comparativo mostrando que o funcionário não possui acesso à aba de Relatórios ou ao botão de adicionar produto]_
+Admin
+> <img width="1170" height="161" alt="WhatsApp Image 2026-06-14 at 16 15 28" src="https://github.com/user-attachments/assets/556a89f9-2ecf-47a0-bef7-c2f34df947cd" />
+
+Funcionário
+> <img width="1170" height="169" alt="WhatsApp Image 2026-06-14 at 16 15 28 (1)" src="https://github.com/user-attachments/assets/d5c8c689-f4f7-4988-84fb-186588bae3b6" />
 
 ---
 
@@ -457,7 +460,7 @@ src/app/
 
 O gerenciamento das atividades da equipe é realizado por meio do **GitHub Projects**, utilizando um quadro Kanban com as colunas: *A Fazer*, *Em Progresso* e *Concluído*. As tarefas foram distribuídas entre os integrantes conforme os requisitos funcionais atribuídos a cada um.
 
-> _[Inserir screenshot atual do quadro Kanban do GitHub Projects mostrando o estado das tarefas na Sprint 3]_
+> <img width="1600" height="588" alt="WhatsApp Image 2026-06-14 at 16 15 36" src="https://github.com/user-attachments/assets/5c05ad2f-8cc8-4bb2-915f-1edacf3047c7" />
 
 **Resumo do status atual:**
 

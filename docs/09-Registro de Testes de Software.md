@@ -1,6 +1,6 @@
 # Registro de Testes de Software
 
-<span style="color:red">Pré-requisitos: <a href="3-Projeto de Interface.md"> Projeto de Interface</a></span>, <a href="8-Plano de Testes de Software.md"> Plano de Testes de Software</a>
+<span style="color:red">Pré-requisitos: <a href="04-Projeto de Interface.md"> Projeto de Interface</a></span>, <a href="08-Plano de Testes de Software.md"> Plano de Testes de Software</a>
 
 O Registro de Testes de Software do projeto **Toninho Car Estoque** apresenta os resultados obtidos na execução dos cenários definidos no plano de testes. O objetivo foi verificar se as principais funcionalidades do sistema atendem aos requisitos especificados, considerando os perfis de **Administrador** e **Funcionário** e o fluxo de uso previsto para a aplicação mobile.
 

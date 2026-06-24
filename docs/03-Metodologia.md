@@ -1,6 +1,6 @@
 # Metodologia
 
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Documentação de Especificação</a></span>
+<span style="color:red">Pré-requisitos: <a href="02-Especificação do Projeto.md"> Documentação de Especificação</a></span>
 
 Esta seção descreve a metodologia de trabalho adotada pela equipe para o desenvolvimento do projeto **Toninho Car Estoque**, desde a organização dos ambientes de trabalho até a forma de gerenciamento das atividades, do código-fonte e da colaboração entre os integrantes. O projeto será desenvolvido utilizando **React** para construção da aplicação, com foco em uma solução mobile para controle de estoque da mecânica.
 
@@ -12,7 +12,7 @@ Os artefatos do projeto serão produzidos e organizados em diferentes ambientes,
 
 | Ambiente | Plataforma | Link de Acesso |
 |---|---|---|
-| Repositório do projeto | GitHub Classroom / GitHub | https://github.com |
+| Repositório do projeto | GitHub Classroom / GitHub | https://github.com/ICEI-PUC-Minas-PSG-ADS-TI/icei-pucminas-psg-ads-n-2026-1-tiam-toninho-car-estoque.git |
 | Desenvolvimento da aplicação | Visual Studio Code | https://code.visualstudio.com/ |
 | Desenvolvimento mobile com React | React / React Native / Expo | https://react.dev/ |
 | Prototipação de telas | Figma | https://www.figma.com/ |
@@ -74,9 +74,9 @@ A divisão de papéis do grupo será a seguinte:
 
 - **Product Owner:** Marcus Vinicius;
 - **Scrum Master:** Geovane Araújo;
-- **Equipe de Desenvolvimento:** Marcus Vinicius, Geovane Araújo e Rafael Moreira.
+- **Equipe de Desenvolvimento:** Marcus Vinicius, Geovane Araújo e Rafael Oliveira.
 
-O integrante **Marcus Vinicius** atuará como Product Owner, sendo responsável por acompanhar as necessidades do cliente, validar as prioridades do sistema e garantir que o produto desenvolvido esteja alinhado ao objetivo do projeto. O integrante **Geovane Araújo** atuará como Scrum Master, auxiliando na organização das tarefas, no acompanhamento do fluxo de trabalho e no alinhamento entre os membros da equipe. Já **Rafael Moreira** atuará de forma mais direta no desenvolvimento da aplicação, colaborando também nas etapas de testes, ajustes e construção técnica das funcionalidades.
+O integrante **Marcus Vinicius** atuará como Product Owner, sendo responsável por acompanhar as necessidades do cliente, validar as prioridades do sistema e garantir que o produto desenvolvido esteja alinhado ao objetivo do projeto. O integrante **Geovane Araújo** atuará como Scrum Master, auxiliando na organização das tarefas, no acompanhamento do fluxo de trabalho e no alinhamento entre os membros da equipe. Já **Rafael Oliveira** atuará de forma mais direta no desenvolvimento da aplicação, colaborando também nas etapas de testes, ajustes e construção técnica das funcionalidades.
 
 Embora exista essa divisão principal de papéis, o desenvolvimento do projeto será colaborativo, de modo que todos os integrantes possam contribuir em documentação, implementação, validação e apresentação do trabalho.
 

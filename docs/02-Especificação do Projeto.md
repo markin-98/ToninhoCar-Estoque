@@ -85,6 +85,51 @@ A técnica foi aplicada da seguinte forma:
 | RNF-007 | O sistema deve permitir manutenção e evolução futura da aplicação | MÉDIA |
 | RNF-008 | O sistema deve registrar as movimentações de forma confiável para consulta posterior | ALTA |
 
+#### Forma de verificação dos requisitos não funcionais
+
+Para que os requisitos não funcionais possam ser avaliados de forma objetiva, foram definidas as seguintes formas de verificação:
+
+| RNF | Meta mensurável | Forma de verificação |
+|---|---|---|
+| RNF-001 | Layout adaptado a telas de smartphones sem corte ou sobreposição de conteúdo | Inspeção visual em dispositivos/emuladores de diferentes tamanhos |
+| RNF-002 | Pelo menos 80% das tarefas do teste de usabilidade concluídas sem ajuda | Teste de usabilidade (ver Plano de Testes de Usabilidade) |
+| RNF-003 | Tempo de resposta das principais operações ≤ 3 segundos | Medição manual durante os testes funcionais |
+| RNF-004 | 100% das tentativas de acesso a funções não permitidas bloqueadas por perfil | Teste funcional com os dois perfis |
+| RNF-005 | Zero divergências entre a soma das movimentações e a quantidade atual dos produtos | Conferência dos dados após a execução dos cenários de teste |
+| RNF-006 | Textos e valores legíveis em tela de celular, validados pelos usuários | Teste de usabilidade (métrica de satisfação) |
+| RNF-007 | Código organizado em camadas (contextos, componentes, tipos) com lint sem erros | Revisão de código e execução do ESLint |
+| RNF-008 | 100% das movimentações registradas disponíveis no histórico | Teste funcional do histórico (CTS-12) |
+
+---
+
+## Regras de Negócio
+
+As regras de negócio formalizam o comportamento esperado do sistema no contexto da mecânica, complementando os requisitos funcionais:
+
+| ID | Regra de Negócio | Requisito(s) Relacionado(s) |
+|---|---|---|
+| RN-001 | Uma saída ou baixa de estoque não pode ser registrada com quantidade superior à quantidade disponível do produto | RF-004, RNF-005 |
+| RN-002 | Toda alteração de preço de produto deve gerar um registro no histórico de preços, com valor anterior, valor novo, usuário responsável e data | RF-003, RF-007 |
+| RN-003 | Um produto que possua movimentações vinculadas não pode ser excluído, preservando a integridade do histórico | RF-002, RNF-005 |
+| RN-004 | Um produto é considerado em estoque baixo quando sua quantidade atual for menor ou igual ao estoque mínimo cadastrado | RF-008 |
+| RN-005 | Somente o perfil Administrador pode cadastrar, editar e excluir produtos, alterar preços e acessar relatórios gerenciais | RF-002, RF-003, RF-009, RNF-004 |
+| RN-006 | O perfil Funcionário pode consultar produtos, registrar saídas de estoque e gerenciar fichas de carro; registros de entrada de estoque são atribuição do Administrador | RF-004, RF-005, RF-006, RNF-004 |
+| RN-007 | Toda movimentação deve registrar o usuário responsável, o tipo (entrada, saída ou baixa), a quantidade, a data/hora e, quando aplicável, a ficha do carro vinculada | RF-004, RF-007 |
+| RN-008 | Uma ficha de carro deve conter, no mínimo, a placa do veículo e o nome do cliente para ser registrada | RF-006 |
+
+---
+
+## Critérios de Aceitação
+
+Os critérios abaixo, no formato *Dado / Quando / Então*, definem as condições de aceitação das principais funcionalidades:
+
+- **RF-001 (Login por perfil):** Dado um usuário cadastrado com credenciais válidas, quando ele realizar o login, então o sistema deve autenticá-lo e direcioná-lo à área correspondente ao seu perfil; dado um usuário com credenciais inválidas, quando ele tentar o login, então o sistema deve exibir mensagem de erro e impedir o acesso.
+- **RF-002 (Gerenciar produtos):** Dado um administrador autenticado, quando ele cadastrar um produto com todos os campos obrigatórios, então o produto deve aparecer na listagem; quando algum campo obrigatório estiver vazio ou inválido, então o sistema deve impedir o salvamento e indicar o campo com erro.
+- **RF-004 (Movimentações):** Dado um produto com estoque disponível, quando uma saída válida for registrada, então a quantidade do produto deve ser reduzida no mesmo valor; dado um produto com estoque insuficiente, quando uma saída maior que o disponível for solicitada, então o sistema deve bloquear a operação e exibir alerta (RN-001).
+- **RF-006 (Ficha do carro):** Dado um usuário autenticado, quando ele criar uma ficha informando ao menos placa e nome do cliente, então a ficha deve ser registrada e aparecer na listagem; quando itens forem associados à ficha, então o valor total do atendimento deve ser calculado e exibido.
+- **RF-008 (Alerta de estoque baixo):** Dado um produto com quantidade atual menor ou igual ao estoque mínimo, quando o administrador acessar o dashboard ou a listagem de produtos, então o produto deve ser destacado como em estoque baixo (RN-004).
+- **RF-009 (Relatórios):** Dado um administrador autenticado, quando ele acessar a tela de relatórios e aplicar um filtro de período, então apenas as movimentações do período selecionado devem ser exibidas, com os totais correspondentes.
+
 ---
 
 ## Restrições
@@ -94,7 +139,7 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 | ID | Restrição |
 |----|-----------|
 | 01 | O projeto deverá ser entregue até o final do semestre |
-| 02 | Não pode ser desenvolvido um módulo de backend |
+| 02 | Não será desenvolvido um módulo de backend próprio; a persistência e a autenticação utilizarão uma plataforma de backend como serviço (Supabase) |
 | 03 | A primeira versão do sistema será focada em ambiente mobile |
 | 04 | O escopo inicial estará limitado às funcionalidades levantadas junto ao cliente |
 | 05 | O sistema trabalhará inicialmente com apenas dois perfis de acesso: administrador e funcionário |

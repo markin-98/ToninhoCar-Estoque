@@ -1,6 +1,6 @@
 # Plano de Testes de Software
 
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Especificação do Projeto</a></span>, <a href="3-Projeto de Interface.md"> Projeto de Interface</a>
+<span style="color:red">Pré-requisitos: <a href="02-Especificação do Projeto.md"> Especificação do Projeto</a></span>, <a href="04-Projeto de Interface.md"> Projeto de Interface</a>
 
 O Plano de Testes de Software do projeto **Toninho Car Estoque** tem como finalidade definir os cenários de teste que serão utilizados para verificar se as funcionalidades da aplicação atendem aos requisitos especificados. Os testes foram planejados com base nas principais funções do sistema, considerando os perfis de uso do **Administrador** e do **Funcionário**, além da estrutura da interface mobile proposta para a solução.
 
@@ -83,6 +83,18 @@ Os cenários abaixo foram definidos para demonstrar o atendimento dos requisitos
 | CTS-13 | Alerta de estoque baixo | Administrador | Verificar item com quantidade abaixo do mínimo cadastrado | O sistema deve sinalizar o produto em estoque baixo | RF-008 |
 | CTS-14 | Relatórios gerenciais | Administrador | Visualizar relatório com movimentações e valores do estoque | O sistema deve apresentar os dados de forma organizada | RF-009 |
 
+### Cenários de teste negativos (validação de dados e controle de acesso)
+
+Além dos cenários principais, foram definidos cenários negativos para verificar o comportamento do sistema diante de entradas inválidas e tentativas de acesso indevido:
+
+| ID | Funcionalidade avaliada | Perfil | Cenário de teste | Resultado esperado | Requisito relacionado |
+|---|---|---|---|---|---|
+| CTS-15 | Login com credenciais inválidas | Todos | Tentar realizar login com e-mail ou senha incorretos | O sistema deve exibir mensagem de erro e impedir o acesso | RF-001, RNF-004 |
+| CTS-16 | Saída maior que o estoque | Funcionário | Registrar saída com quantidade superior à disponível | O sistema deve bloquear a operação e exibir alerta de estoque insuficiente | RF-004, RNF-005 |
+| CTS-17 | Cadastro com campos obrigatórios vazios | Administrador | Tentar salvar produto sem preencher nome, código ou preço | O sistema deve impedir o salvamento e indicar os campos com erro | RF-002 |
+| CTS-18 | Acesso indevido por perfil | Funcionário | Verificar se o funcionário visualiza funções de gestão (cadastro/edição de produtos, relatórios) | As funções administrativas não devem estar visíveis nem acessíveis ao funcionário | RNF-004 |
+| CTS-19 | Criação de ficha sem dados mínimos | Funcionário | Tentar criar ficha sem informar placa ou nome do cliente | O sistema deve impedir o registro e solicitar o preenchimento dos campos obrigatórios | RF-006 |
+
 ## Casos de teste detalhados
 
 ### Caso de Teste 1 – Login por perfil
@@ -139,6 +151,39 @@ Os cenários abaixo foram definidos para demonstrar o atendimento dos requisitos
 | Passos | Consultar o dashboard ou listagem de produtos |
 | Resultado esperado | O sistema deve destacar o item como estoque baixo |
 | Critério de aceitação | O alerta deve ser visível ao administrador |
+
+### Caso de Teste 6 – Login com credenciais inválidas
+
+| Campo | Descrição |
+|---|---|
+| ID | CTS-15 |
+| Objetivo | Validar o bloqueio de acesso com credenciais incorretas |
+| Pré-condição | Aplicação na tela de login |
+| Passos | Informar e-mail válido com senha incorreta (e depois e-mail não cadastrado), acionar o botão de entrada |
+| Resultado esperado | O sistema deve exibir mensagem de erro e permanecer na tela de login |
+| Critério de aceitação | Nenhum acesso deve ser concedido com credenciais inválidas |
+
+### Caso de Teste 7 – Saída maior que o estoque disponível
+
+| Campo | Descrição |
+|---|---|
+| ID | CTS-16 |
+| Objetivo | Validar o bloqueio de saída com quantidade superior ao estoque |
+| Pré-condição | Produto cadastrado com quantidade disponível conhecida |
+| Passos | Acessar a tela de movimentação, selecionar saída, informar quantidade maior que a disponível, confirmar |
+| Resultado esperado | O sistema deve exibir alerta de estoque insuficiente e não registrar a movimentação |
+| Critério de aceitação | A quantidade do produto deve permanecer inalterada após a tentativa |
+
+### Caso de Teste 8 – Controle de acesso por perfil
+
+| Campo | Descrição |
+|---|---|
+| ID | CTS-18 |
+| Objetivo | Validar que o funcionário não acessa funções administrativas |
+| Pré-condição | Usuário com perfil de funcionário autenticado |
+| Passos | Navegar por todas as abas disponíveis no perfil de funcionário |
+| Resultado esperado | As funções de cadastro/edição/exclusão de produtos, alteração de preços e relatórios não devem estar visíveis nem acessíveis |
+| Critério de aceitação | Nenhuma função administrativa deve ser executável pelo perfil de funcionário |
 
 ## Critérios de aprovação
 

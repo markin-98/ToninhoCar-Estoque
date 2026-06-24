@@ -40,6 +40,17 @@ Objetivos Específicos
 
 - Gerar histórico de movimentações e relatórios de entrada, saída e valores.
 
+Fora do Escopo
+
+Para manter o foco no problema central do cliente — o controle de estoque —, as seguintes funcionalidades **não fazem parte** da primeira versão do projeto, podendo ser consideradas em evoluções futuras:
+
+- Agendamento de serviços e atendimentos;
+- Ordem de serviço completa, com registro de mão de obra, orçamento e aprovação do cliente;
+- Faturamento, emissão de notas fiscais e controle financeiro da oficina;
+- Acesso de clientes finais ao aplicativo;
+- Gestão de fornecedores e pedidos de compra;
+- Controle de garantias de peças e serviços.
+
 ## Justificativa
 
 A criação do Toninho Car Estoque é importante porque a gestão de estoque é uma atividade essencial para o funcionamento adequado de uma mecânica. Quando o controle de peças e produtos não é feito de forma estruturada, a empresa pode enfrentar dificuldades para manter a organização interna, acompanhar o consumo dos itens e controlar os valores praticados.
