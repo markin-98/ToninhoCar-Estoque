@@ -6,8 +6,6 @@
 
 `4° SEMESTRE`
 
-Descrever resumidamente, em um ou dois parágrafos, o projeto que está sendo desenvolvido.
-
 O projeto Toninho Car Estoque é um aplicativo mobile para controle de estoque de uma mecânica automotiva. Ele foi criado para organizar o cadastro de peças e produtos, registrar entradas e saídas, consultar itens disponíveis e acompanhar preços e movimentações do estoque.
 
 A aplicação terá acesso para administrador e funcionário, permitindo mais controle, agilidade e organização na rotina da oficina.
@@ -24,7 +22,39 @@ A aplicação terá acesso para administrador e funcionário, permitindo mais co
 
 ## Instruções de utilização
 
-Assim que a primeira versão do sistema estiver disponível, deverá complementar com as instruções de utilização. Descreva como instalar eventuais dependências e como executar a aplicação.
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) (versão LTS) e npm instalados;
+- Aplicativo **Expo Go** instalado no smartphone (Android/iOS) ou um emulador configurado.
+
+### Instalação e execução
+
+```bash
+# 1. Acessar a pasta da aplicação
+cd src/app
+
+# 2. Instalar as dependências
+npm install
+
+# 3. Configurar as variáveis de ambiente do Supabase
+#    Criar um arquivo .env na pasta src/app com:
+#    EXPO_PUBLIC_SUPABASE_URL=<url-do-projeto-supabase>
+#    EXPO_PUBLIC_SUPABASE_KEY=<chave-publica-do-projeto>
+
+# 4. Iniciar a aplicação
+npx expo start
+```
+
+Após iniciar, escaneie o QR Code com o aplicativo **Expo Go** (ou pressione `a` para abrir no emulador Android).
+
+### Credenciais de teste
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador | admin@toninho.com | 123456 |
+| Funcionário | func@toninho.com | 123456 |
+
+O script de criação do banco de dados está disponível em [`src/bd/ToninhoCar.sql`](src/bd/ToninhoCar.sql).
 
 # Documentação
 
