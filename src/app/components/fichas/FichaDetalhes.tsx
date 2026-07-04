@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, KeyboardAvoidingView, Platform,
+  StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { mostrarAlerta } from '@/lib/alerta';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFichas } from '@/contexts/FichasContext';
 import { useProdutos } from '@/contexts/ProdutosContext';
 import { useMovimentacoes } from '@/contexts/MovimentacoesContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { FichaCarro, StatusFicha, Produto } from '@/types';
+import { useTema, Cores } from '@/contexts/TemaContext';
+import { StatusFicha, Produto } from '@/types';
 
 const STATUS_CONFIG: Record<StatusFicha, { label: string; cor: string; proximo: StatusFicha | null }> = {
   aberta:    { label: 'Aberta',    cor: '#3B82F6', proximo: 'concluida' },
@@ -26,13 +28,25 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
   const { produtos, atualizarQuantidade } = useProdutos();
   const { registrarMovimentacao } = useMovimentacoes();
   const { usuario } = useAuth();
+  const { cores } = useTema();
   const router = useRouter();
+  const styles = useMemo(() => estilos(cores), [cores]);
 
   const [observacoes, setObservacoes] = useState<string | null>(null);
   const [adicionandoPeca, setAdicionandoPeca] = useState(false);
   const [buscaPeca, setBuscaPeca] = useState('');
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
   const [qtdPeca, setQtdPeca] = useState('');
+
+  // IMPORTANTE: todos os Hooks (incl. useMemo) devem ser chamados antes de
+  // qualquer "return" condicional, senão o React quebra as Regras dos Hooks.
+  const resultadosBusca = useMemo(() => {
+    if (!buscaPeca.trim() || produtoSelecionado) return [];
+    const t = buscaPeca.toLowerCase();
+    return produtos.filter(
+      (p) => p.nome.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t),
+    ).slice(0, 5);
+  }, [buscaPeca, produtos, produtoSelecionado]);
 
   const ficha = buscarPorId(fichaId);
   if (!ficha) return null;
@@ -42,46 +56,38 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
 
   const total = ficha.itens.reduce((acc, i) => acc + i.quantidade * i.preco_unitario, 0);
 
-  const resultadosBusca = useMemo(() => {
-    if (!buscaPeca.trim() || produtoSelecionado) return [];
-    const t = buscaPeca.toLowerCase();
-    return produtos.filter(
-      (p) => p.nome.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t),
-    ).slice(0, 5);
-  }, [buscaPeca, produtos, produtoSelecionado]);
-
-  function handleSalvar() {
+  const handleSalvar = () => {
     atualizarFicha(ficha.id, { observacoes: observacoesAtual });
-    Alert.alert('Salvo', 'Ficha atualizada com sucesso.');
+    mostrarAlerta('Salvo', 'Ficha atualizada com sucesso.');
   }
 
-  function handleConcluir() {
-    Alert.alert('Concluir atendimento', 'Deseja marcar esta ficha como concluída?', [
+  const handleConcluir = () => {
+    mostrarAlerta('Concluir atendimento', 'Deseja marcar esta ficha como concluída?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Concluir', onPress: () => atualizarFicha(ficha.id, { status: 'concluida' }) },
     ]);
   }
 
-  function handleCancelar() {
-    Alert.alert('Cancelar atendimento', 'Deseja cancelar esta ficha?', [
+  const handleCancelar = () => {
+    mostrarAlerta('Cancelar atendimento', 'Deseja cancelar esta ficha?', [
       { text: 'Não', style: 'cancel' },
       { text: 'Cancelar ficha', style: 'destructive', onPress: () => atualizarFicha(ficha.id, { status: 'cancelada' }) },
     ]);
   }
 
-  function handleExcluir() {
-    Alert.alert('Excluir Ficha', `Deseja excluir a ficha de ${ficha.placa}? Esta ação não pode ser desfeita.`, [
+  const handleExcluir = () => {
+    mostrarAlerta('Excluir Ficha', `Deseja excluir a ficha de ${ficha.placa}? Esta ação não pode ser desfeita.`, [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Excluir', style: 'destructive', onPress: () => { excluirFicha(ficha.id); router.back(); } },
     ]);
   }
 
-  function handleAdicionarPeca() {
-    if (!produtoSelecionado) { Alert.alert('Atenção', 'Selecione um produto.'); return; }
+  const handleAdicionarPeca = () => {
+    if (!produtoSelecionado) { mostrarAlerta('Atenção', 'Selecione um produto.'); return; }
     const qty = parseInt(qtdPeca, 10);
-    if (isNaN(qty) || qty <= 0) { Alert.alert('Atenção', 'Informe uma quantidade válida.'); return; }
+    if (isNaN(qty) || qty <= 0) { mostrarAlerta('Atenção', 'Informe uma quantidade válida.'); return; }
     if (qty > produtoSelecionado.quantidade_atual) {
-      Alert.alert('Estoque insuficiente', `Estoque atual: ${produtoSelecionado.quantidade_atual} un.`);
+      mostrarAlerta('Estoque insuficiente', `Estoque atual: ${produtoSelecionado.quantidade_atual} un.`);
       return;
     }
 
@@ -110,8 +116,8 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
     setQtdPeca('');
   }
 
-  function handleRemoverItem(id_item: number, nome: string) {
-    Alert.alert('Remover peça', `Remover "${nome}" desta ficha?`, [
+  const handleRemoverItem = (id_item: number, nome: string) => {
+    mostrarAlerta('Remover peça', `Remover "${nome}" desta ficha?`, [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Remover', style: 'destructive', onPress: () => removerItem(ficha.id, id_item) },
     ]);
@@ -133,11 +139,11 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
             </View>
           </View>
           <View style={styles.carroCardInfo}>
-            <Ionicons name="person-outline" size={14} color="#64748B" />
+            <Ionicons name="person-outline" size={14} color="#94A3B8" />
             <Text style={styles.carroInfoTexto}>{ficha.nome_cliente}</Text>
           </View>
           <View style={styles.carroCardInfo}>
-            <Ionicons name="calendar-outline" size={14} color="#64748B" />
+            <Ionicons name="calendar-outline" size={14} color="#94A3B8" />
             <Text style={styles.carroInfoTexto}>{formatarData(ficha.data_atendimento)}</Text>
           </View>
         </View>
@@ -162,7 +168,7 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
           value={observacoesAtual}
           onChangeText={setObservacoes}
           placeholder="Nenhuma observação..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={cores.textoTerc}
           multiline
           numberOfLines={3}
           textAlignVertical="top"
@@ -185,18 +191,18 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
         {adicionandoPeca && (
           <View style={styles.formPeca}>
             <View style={styles.buscaContainer}>
-              <Ionicons name="search-outline" size={16} color="#94A3B8" style={{ marginRight: 6 }} />
+              <Ionicons name="search-outline" size={16} color={cores.textoTerc} style={{ marginRight: 6 }} />
               <TextInput
                 style={styles.buscaInput}
                 value={buscaPeca}
                 onChangeText={(t) => { setBuscaPeca(t); setProdutoSelecionado(null); }}
                 placeholder="Buscar produto..."
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={cores.textoTerc}
                 autoCorrect={false}
               />
               {(buscaPeca || produtoSelecionado) && (
                 <TouchableOpacity onPress={() => { setBuscaPeca(''); setProdutoSelecionado(null); }}>
-                  <Ionicons name="close-circle" size={16} color="#94A3B8" />
+                  <Ionicons name="close-circle" size={16} color={cores.textoTerc} />
                 </TouchableOpacity>
               )}
             </View>
@@ -230,7 +236,7 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
                 value={qtdPeca}
                 onChangeText={setQtdPeca}
                 placeholder="Qtd."
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={cores.textoTerc}
                 keyboardType="numeric"
               />
               <TouchableOpacity style={styles.btnAdicionarPeca} onPress={handleAdicionarPeca} activeOpacity={0.85}>
@@ -292,8 +298,8 @@ export default function FichaDetalhes({ fichaId }: { fichaId: number }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
   conteudo: { padding: 20, paddingBottom: 40 },
   carroCard: {
     backgroundColor: '#1E293B', borderRadius: 16, padding: 18, marginBottom: 16,
@@ -315,52 +321,52 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 10, borderWidth: 1.5,
     borderColor: '#EF4444', justifyContent: 'center', alignItems: 'center',
   },
-  secaoTitulo: { fontSize: 15, fontWeight: '700', color: '#1E293B', marginBottom: 10, marginTop: 4 },
+  secaoTitulo: { fontSize: 15, fontWeight: '700', color: c.texto, marginBottom: 10, marginTop: 4 },
   secaoHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  adicionarPecaBtn: { fontSize: 14, color: '#2563EB', fontWeight: '600' },
+  adicionarPecaBtn: { fontSize: 14, color: c.primaria, fontWeight: '600' },
   input: {
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E8F0',
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1E293B',
+    backgroundColor: c.inputFundo, borderWidth: 1, borderColor: c.cardBorda,
+    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: c.texto,
   },
   inputMultilinha: { height: 80, paddingTop: 12, marginBottom: 16 },
   formPeca: {
-    backgroundColor: '#fff', borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 12,
+    backgroundColor: c.card, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: c.cardBorda, marginBottom: 12,
   },
   buscaContainer: {
     flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 8,
+    borderWidth: 1, borderColor: c.cardBorda, borderRadius: 8,
     paddingHorizontal: 10, paddingVertical: 8, marginBottom: 8,
   },
-  buscaInput: { flex: 1, fontSize: 14, color: '#1E293B' },
-  resultados: { borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 8, marginBottom: 8, overflow: 'hidden' },
-  resultadoItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
-  resultadoNome: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
-  resultadoInfo: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  buscaInput: { flex: 1, fontSize: 14, color: c.texto },
+  resultados: { borderWidth: 1, borderColor: c.cardBorda, borderRadius: 8, marginBottom: 8, overflow: 'hidden' },
+  resultadoItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: c.divisor },
+  resultadoNome: { fontSize: 14, fontWeight: '600', color: c.texto },
+  resultadoInfo: { fontSize: 12, color: c.textoTerc, marginTop: 2 },
   pecaSelecionadaCard: {
-    backgroundColor: '#EFF6FF', borderRadius: 8, padding: 10, marginBottom: 8,
-    borderLeftWidth: 3, borderLeftColor: '#2563EB',
+    backgroundColor: c.primariaSuave, borderRadius: 8, padding: 10, marginBottom: 8,
+    borderLeftWidth: 3, borderLeftColor: c.primaria,
   },
-  pecaSelecionadaNome: { fontSize: 14, fontWeight: '600', color: '#1E40AF' },
-  pecaSelecionadaInfo: { fontSize: 12, color: '#3B82F6', marginTop: 2 },
+  pecaSelecionadaNome: { fontSize: 14, fontWeight: '600', color: c.primaria },
+  pecaSelecionadaInfo: { fontSize: 12, color: c.primaria, marginTop: 2 },
   formPecaRow: { flexDirection: 'row', gap: 10 },
   inputQty: { width: 80, textAlign: 'center' },
   btnAdicionarPeca: {
-    flex: 1, backgroundColor: '#2563EB', borderRadius: 10,
+    flex: 1, backgroundColor: c.primaria, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
   },
   btnAdicionarPecaTexto: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  semPecas: { fontSize: 14, color: '#94A3B8', textAlign: 'center', marginVertical: 16 },
+  semPecas: { fontSize: 14, color: c.textoTerc, textAlign: 'center', marginVertical: 16 },
   itemPeca: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 8,
-    borderWidth: 1, borderColor: '#E2E8F0',
+    backgroundColor: c.card, borderRadius: 10, padding: 12, marginBottom: 8,
+    borderWidth: 1, borderColor: c.cardBorda,
   },
   itemPecaInfo: { flex: 1, marginRight: 8 },
-  itemPecaNome: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
-  itemPecaDetalhes: { fontSize: 12, color: '#64748B', marginTop: 2 },
+  itemPecaNome: { fontSize: 14, fontWeight: '600', color: c.texto },
+  itemPecaDetalhes: { fontSize: 12, color: c.textoSec, marginTop: 2 },
   itemPecaDireita: { alignItems: 'flex-end' },
-  itemPecaSubtotal: { fontSize: 14, fontWeight: '700', color: '#2563EB' },
+  itemPecaSubtotal: { fontSize: 14, fontWeight: '700', color: c.primaria },
   totalCard: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: '#1E293B', borderRadius: 12, padding: 16, marginTop: 8, marginBottom: 20,
@@ -368,7 +374,7 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 14, color: '#94A3B8', fontWeight: '500' },
   totalValor: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
   botaoSalvar: {
-    backgroundColor: '#2563EB', borderRadius: 12,
+    backgroundColor: c.primaria, borderRadius: 12,
     paddingVertical: 14, alignItems: 'center', marginBottom: 12,
   },
   botaoSalvarTexto: { color: '#fff', fontSize: 15, fontWeight: '700' },

@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProdutos } from '@/contexts/ProdutosContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
+import SeletorTema from '@/components/SeletorTema';
 
 // Paleta de ícones para os cards de produto na lista
 const PALETA_ITENS = [
@@ -32,12 +35,14 @@ function getPercentualBarra(quantidade: number, minimo: number) {
   return Math.min(quantidade / Math.max(minimo * 3, 1), 1);
 }
 
-type Props = { rotaProdutos: string };
+type Props = { rotaProdutos: string; rotaEquipe?: string };
 
-export default function DashboardView({ rotaProdutos }: Props) {
+export default function DashboardView({ rotaProdutos, rotaEquipe }: Props) {
   const { usuario, logout } = useAuth();
   const { produtos } = useProdutos();
+  const { cores } = useTema();
   const router = useRouter();
+  const s = useMemo(() => estilos(cores), [cores]);
 
   const totalProdutos = produtos.length;
   const estoqueBaixo = produtos.filter((p) => p.quantidade_atual <= p.estoque_minimo).length;
@@ -50,7 +55,7 @@ export default function DashboardView({ rotaProdutos }: Props) {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 32 }}
     >
-      {/* Header — mantido sem alterações */}
+      {/* Header */}
       <View style={s.header}>
         <View>
           <Text style={s.saudacao}>
@@ -58,13 +63,16 @@ export default function DashboardView({ rotaProdutos }: Props) {
           </Text>
           <Text style={s.subtitulo}>ToninhoCar Estoque</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => { logout(); router.replace('/login'); }}
-          style={s.botaoSair}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="log-out-outline" size={22} color="#64748B" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <SeletorTema />
+          <TouchableOpacity
+            onPress={() => { logout(); router.replace('/login'); }}
+            style={s.botaoSair}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="log-out-outline" size={22} color={cores.textoSec} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Cards de métricas verticais */}
@@ -116,6 +124,26 @@ export default function DashboardView({ rotaProdutos }: Props) {
           </View>
         </View>
 
+        {/* Card 4: Gestão da equipe (apenas admin) */}
+        {rotaEquipe && (
+          <TouchableOpacity
+            style={s.card}
+            onPress={() => router.push(rotaEquipe as never)}
+            activeOpacity={0.8}
+          >
+            <View style={s.cardConteudo}>
+              <Text style={s.cardTitulo}>Equipe</Text>
+              <Text style={[s.cardValor, { fontSize: 18 }]}>Gerenciar acessos</Text>
+              <Text style={[s.cardIndicador, { color: cores.primaria }]}>
+                Cadastrar mecânicos e definir funções →
+              </Text>
+            </View>
+            <View style={[s.cardIcone, { backgroundColor: '#EDE9FE' }]}>
+              <Ionicons name="people-outline" size={22} color="#7C3AED" />
+            </View>
+          </TouchableOpacity>
+        )}
+
       </View>
 
       {/* Título da seção de produtos */}
@@ -158,10 +186,9 @@ export default function DashboardView({ rotaProdutos }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
 
-  // Header inalterado
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -170,14 +197,14 @@ const s = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
   },
-  saudacao: { fontSize: 22, fontWeight: 'bold', color: '#1E293B' },
-  subtitulo: { fontSize: 13, color: '#64748B', marginTop: 2 },
-  botaoSair: { padding: 8, borderRadius: 8, backgroundColor: '#F1F5F9' },
+  saudacao: { fontSize: 22, fontWeight: 'bold', color: c.texto },
+  subtitulo: { fontSize: 13, color: c.textoSec, marginTop: 2 },
+  botaoSair: { padding: 8, borderRadius: 8, backgroundColor: c.inputFundo },
 
   // Cards de métricas
   secaoCards: { paddingHorizontal: 16, gap: 12, marginBottom: 24 },
   card: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 20,
     flexDirection: 'row',
@@ -190,8 +217,8 @@ const s = StyleSheet.create({
     elevation: 2,
   },
   cardConteudo: { flex: 1, marginRight: 12 },
-  cardTitulo: { fontSize: 13, color: '#6B7280', marginBottom: 4 },
-  cardValor: { fontSize: 30, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
+  cardTitulo: { fontSize: 13, color: c.textoSec, marginBottom: 4 },
+  cardValor: { fontSize: 30, fontWeight: 'bold', color: c.texto, marginBottom: 4 },
   cardIndicador: { fontSize: 12, fontWeight: '500' },
   cardIcone: {
     width: 44,
@@ -209,12 +236,12 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
-  secaoTitulo: { fontSize: 18, fontWeight: 'bold', color: '#111827' },
-  verTodos: { fontSize: 13, color: '#3B82F6', fontWeight: '600' },
+  secaoTitulo: { fontSize: 18, fontWeight: 'bold', color: c.texto },
+  verTodos: { fontSize: 13, color: c.primaria, fontWeight: '600' },
 
   lista: { paddingHorizontal: 16, gap: 10 },
   itemCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
@@ -234,8 +261,8 @@ const s = StyleSheet.create({
     marginRight: 14,
   },
   itemConteudo: { flex: 1 },
-  itemNome: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 2 },
-  itemQtd: { fontSize: 12, color: '#6B7280', marginBottom: 8 },
-  barraFundo: { height: 7, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
+  itemNome: { fontSize: 15, fontWeight: '700', color: c.texto, marginBottom: 2 },
+  itemQtd: { fontSize: 12, color: c.textoSec, marginBottom: 8 },
+  barraFundo: { height: 7, backgroundColor: c.barraFundo, borderRadius: 4, overflow: 'hidden' },
   barraPreenchimento: { height: '100%', borderRadius: 4 },
 });

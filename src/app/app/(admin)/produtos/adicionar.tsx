@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,21 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   KeyboardAvoidingView,
   Platform,
+  StyleProp,
+  TextStyle,
 } from 'react-native';
+import { mostrarAlerta } from '@/lib/alerta';
 import { useRouter } from 'expo-router';
 import { useProdutos } from '@/contexts/ProdutosContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 
 export default function AdicionarProdutoScreen() {
   const { adicionarProduto, proximoCodigo } = useProdutos();
+  const { cores } = useTema();
   const router = useRouter();
+  const styles = useMemo(() => estilos(cores), [cores]);
 
   const [nome, setNome] = useState('');
   const [codigo, setCodigo] = useState(proximoCodigo);
@@ -37,7 +42,7 @@ export default function AdicionarProdutoScreen() {
   function handleCadastrar() {
     const erro = validar();
     if (erro) {
-      Alert.alert('Dados inválidos', erro);
+      mostrarAlerta('Dados inválidos', erro);
       return;
     }
 
@@ -50,7 +55,7 @@ export default function AdicionarProdutoScreen() {
       estoque_minimo: parseInt(estoqueMinimo, 10),
     });
 
-    Alert.alert('Sucesso', 'Produto cadastrado com sucesso!', [
+    mostrarAlerta('Sucesso', 'Produto cadastrado com sucesso!', [
       { text: 'OK', onPress: () => router.back() },
     ]);
   }
@@ -61,69 +66,69 @@ export default function AdicionarProdutoScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView style={styles.container} contentContainerStyle={styles.conteudo} keyboardShouldPersistTaps="handled">
-        <Campo label="Nome do produto *">
+        <Campo label="Nome do produto *" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={nome}
             onChangeText={setNome}
             placeholder="Ex: Óleo Motor 5W30"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
           />
         </Campo>
 
-        <Campo label="Código *">
+        <Campo label="Código *" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={codigo}
             onChangeText={setCodigo}
             placeholder="Ex: PROD-007"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
             autoCapitalize="characters"
           />
         </Campo>
 
         <View style={styles.linha}>
-          <Campo label="Qtd. inicial *" style={{ flex: 1, marginRight: 8 }}>
+          <Campo label="Qtd. inicial *" labelStyle={styles.label} style={{ flex: 1, marginRight: 8 }}>
             <TextInput
               style={styles.input}
               value={quantidade}
               onChangeText={setQuantidade}
               placeholder="0"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={cores.textoTerc}
               keyboardType="numeric"
             />
           </Campo>
 
-          <Campo label="Estoque mínimo *" style={{ flex: 1 }}>
+          <Campo label="Estoque mínimo *" labelStyle={styles.label} style={{ flex: 1 }}>
             <TextInput
               style={styles.input}
               value={estoqueMinimo}
               onChangeText={setEstoqueMinimo}
               placeholder="0"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={cores.textoTerc}
               keyboardType="numeric"
             />
           </Campo>
         </View>
 
-        <Campo label="Preço unitário (R$) *">
+        <Campo label="Preço unitário (R$) *" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={preco}
             onChangeText={setPreco}
             placeholder="0,00"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
             keyboardType="decimal-pad"
           />
         </Campo>
 
-        <Campo label="Descrição">
+        <Campo label="Descrição" labelStyle={styles.label}>
           <TextInput
             style={[styles.input, styles.inputMultilinha]}
             value={descricao}
             onChangeText={setDescricao}
             placeholder="Descrição opcional do produto..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
             multiline
             numberOfLines={3}
             textAlignVertical="top"
@@ -142,37 +147,39 @@ function Campo({
   label,
   children,
   style,
+  labelStyle,
 }: {
   label: string;
   children: React.ReactNode;
   style?: object;
+  labelStyle?: StyleProp<TextStyle>;
 }) {
   return (
     <View style={[{ marginBottom: 16 }, style]}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={labelStyle}>{label}</Text>
       {children}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
   conteudo: { padding: 20, paddingBottom: 40 },
-  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: c.texto, marginBottom: 6 },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: c.inputFundo,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: c.cardBorda,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#1E293B',
+    color: c.texto,
   },
   inputMultilinha: { height: 88, paddingTop: 12 },
   linha: { flexDirection: 'row' },
   botao: {
-    backgroundColor: '#2563EB',
+    backgroundColor: c.primaria,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: 'center',

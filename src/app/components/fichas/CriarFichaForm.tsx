@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Alert, KeyboardAvoidingView, Platform,
+  ScrollView, KeyboardAvoidingView, Platform, StyleProp, TextStyle,
 } from 'react-native';
+import { mostrarAlerta } from '@/lib/alerta';
 import { useRouter } from 'expo-router';
 import { useFichas } from '@/contexts/FichasContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 
 type Props = { rotaDetalhes: string };
 
 export default function CriarFichaForm({ rotaDetalhes }: Props) {
   const { criarFicha } = useFichas();
+  const { cores } = useTema();
   const router = useRouter();
+  const styles = useMemo(() => estilos(cores), [cores]);
 
   const [placa, setPlaca] = useState('');
   const [modelo, setModelo] = useState('');
@@ -33,7 +37,7 @@ export default function CriarFichaForm({ rotaDetalhes }: Props) {
 
   function handleCriar() {
     const erro = validar();
-    if (erro) { Alert.alert('Dados inválidos', erro); return; }
+    if (erro) { mostrarAlerta('Dados inválidos', erro); return; }
 
     const id = criarFicha({
       placa: placa.trim(),
@@ -50,57 +54,57 @@ export default function CriarFichaForm({ rotaDetalhes }: Props) {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView style={styles.container} contentContainerStyle={styles.conteudo} keyboardShouldPersistTaps="handled">
 
-        <Campo label="Placa *">
+        <Campo label="Placa *" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={placa}
             onChangeText={(t) => setPlaca(formatarPlaca(t))}
             placeholder="Ex: ABC-1234 ou ABC1D23"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
             autoCapitalize="characters"
             autoCorrect={false}
           />
         </Campo>
 
-        <Campo label="Nome do proprietário *">
+        <Campo label="Nome do proprietário *" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={nomeCliente}
             onChangeText={setNomeCliente}
             placeholder="Ex: João da Silva"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
           />
         </Campo>
 
-        <Campo label="Modelo *">
+        <Campo label="Modelo *" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={modelo}
             onChangeText={setModelo}
             placeholder="Ex: Volkswagen Golf 1.4"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
           />
         </Campo>
 
-        <Campo label="Ano">
+        <Campo label="Ano" labelStyle={styles.label}>
           <TextInput
             style={styles.input}
             value={ano}
             onChangeText={setAno}
             placeholder="Ex: 2022"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
             keyboardType="numeric"
             maxLength={4}
           />
         </Campo>
 
-        <Campo label="Observações">
+        <Campo label="Observações" labelStyle={styles.label}>
           <TextInput
             style={[styles.input, styles.inputMultilinha]}
             value={observacoes}
             onChangeText={setObservacoes}
             placeholder="Descrição do problema ou observações iniciais..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={cores.textoTerc}
             multiline
             numberOfLines={3}
             textAlignVertical="top"
@@ -115,27 +119,35 @@ export default function CriarFichaForm({ rotaDetalhes }: Props) {
   );
 }
 
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
+function Campo({
+  label,
+  children,
+  labelStyle,
+}: {
+  label: string;
+  children: React.ReactNode;
+  labelStyle?: StyleProp<TextStyle>;
+}) {
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={labelStyle}>{label}</Text>
       {children}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
   conteudo: { padding: 20, paddingBottom: 40 },
-  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: c.texto, marginBottom: 6 },
   input: {
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E8F0',
+    backgroundColor: c.inputFundo, borderWidth: 1, borderColor: c.cardBorda,
     borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
-    fontSize: 15, color: '#1E293B',
+    fontSize: 15, color: c.texto,
   },
   inputMultilinha: { height: 88, paddingTop: 12 },
   botao: {
-    backgroundColor: '#2563EB', borderRadius: 12,
+    backgroundColor: c.primaria, borderRadius: 12,
     paddingVertical: 15, alignItems: 'center', marginTop: 8,
   },
   botaoTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },

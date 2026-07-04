@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useMovimentacoes } from '@/contexts/MovimentacoesContext';
 import { useProdutos } from '@/contexts/ProdutosContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 import { Movimentacao, TipoMovimentacao } from '@/types';
 
 type FiltroPeriodo = 'hoje' | 'semana' | 'mes' | 'todos';
@@ -66,8 +67,10 @@ const ICONE_TIPO: Record<TipoMovimentacao, keyof typeof Ionicons.glyphMap> = {
 export default function RelatoriosScreen() {
   const { movimentacoes } = useMovimentacoes();
   const { produtos } = useProdutos();
+  const { cores } = useTema();
   const [periodo, setPeriodo] = useState<FiltroPeriodo>('mes');
   const [tipo, setTipo] = useState<FiltroTipo>('todos');
+  const s = useMemo(() => estilos(cores), [cores]);
 
   const porPeriodo = useMemo(
     () => filtrarPorPeriodo(movimentacoes, periodo),
@@ -82,7 +85,7 @@ export default function RelatoriosScreen() {
   const resumo = useMemo(() => {
     const calc = (t: TipoMovimentacao) => {
       const lista = porPeriodo.filter((m) => m.tipo === t);
-      return { count: lista.length, itens: lista.reduce((s, m) => s + m.quantidade, 0) };
+      return { count: lista.length, itens: lista.reduce((sum, m) => sum + m.quantidade, 0) };
     };
     return { entrada: calc('entrada'), saida: calc('saida'), baixa: calc('baixa') };
   }, [porPeriodo]);
@@ -91,7 +94,7 @@ export default function RelatoriosScreen() {
     total: produtos.length,
     baixo: produtos.filter((p) => p.quantidade_atual > 0 && p.quantidade_atual <= p.estoque_minimo).length,
     zerado: produtos.filter((p) => p.quantidade_atual === 0).length,
-    valor: produtos.reduce((s, p) => s + p.quantidade_atual * p.preco_atual, 0),
+    valor: produtos.reduce((sum, p) => sum + p.quantidade_atual * p.preco_atual, 0),
   }), [produtos]);
 
   return (
@@ -100,7 +103,6 @@ export default function RelatoriosScreen() {
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header limpo — igual ao de Produtos */}
       <View style={s.header}>
         <Text style={s.titulo}>Relatórios</Text>
         <Text style={s.subtitulo}>Estoque e movimentações</Text>
@@ -189,7 +191,6 @@ export default function RelatoriosScreen() {
       <View style={s.bloco}>
         <View style={s.historicoHeader}>
           <Text style={s.blocoTitulo}>Histórico</Text>
-          {/* Chips de tipo inline com o título */}
           <View style={s.chipRow}>
             {TIPOS.map((t) => (
               <TouchableOpacity
@@ -214,7 +215,7 @@ export default function RelatoriosScreen() {
 
         {filtradas.length === 0 ? (
           <View style={s.vazio}>
-            <Ionicons name="document-text-outline" size={44} color="#D1D5DB" />
+            <Ionicons name="document-text-outline" size={44} color={cores.textoTerc} />
             <Text style={s.vazioTexto}>Nenhuma movimentação encontrada</Text>
           </View>
         ) : (
@@ -223,12 +224,10 @@ export default function RelatoriosScreen() {
               const b = BADGE[m.tipo];
               return (
                 <View key={m.id} style={s.item}>
-                  {/* Ícone de tipo à esquerda */}
                   <View style={[s.itemIcone, { backgroundColor: b.bg }]}>
                     <Ionicons name={ICONE_TIPO[m.tipo]} size={20} color={b.cor} />
                   </View>
 
-                  {/* Conteúdo central */}
                   <View style={s.itemConteudo}>
                     <View style={s.itemLinha1}>
                       <Text style={s.itemProduto} numberOfLines={1}>{m.nome_produto}</Text>
@@ -255,42 +254,38 @@ export default function RelatoriosScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
 
-  // Header limpo
   header: {
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: c.fundo,
   },
-  titulo: { fontSize: 24, fontWeight: 'bold', color: '#111827' },
-  subtitulo: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
+  titulo: { fontSize: 24, fontWeight: 'bold', color: c.texto },
+  subtitulo: { fontSize: 13, color: c.textoTerc, marginTop: 2 },
 
-  // Blocos de seção
   bloco: { paddingHorizontal: 16, marginBottom: 20 },
-  blocoTitulo: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 10 },
+  blocoTitulo: { fontSize: 15, fontWeight: '700', color: c.texto, marginBottom: 10 },
 
-  // Chips de período
   chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: c.cardBorda,
   },
-  chipAtivo: { backgroundColor: '#3B82F6', borderColor: '#3B82F6' },
-  chipTexto: { fontSize: 13, fontWeight: '500', color: '#374151' },
+  chipAtivo: { backgroundColor: c.primaria, borderColor: c.primaria },
+  chipTexto: { fontSize: 13, fontWeight: '500', color: c.textoSec },
   chipTextoAtivo: { color: '#FFF' },
 
-  // Cards de resumo (3 em linha)
   cardsRow: { flexDirection: 'row', gap: 10 },
   cardResumo: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 14,
     alignItems: 'center',
@@ -310,12 +305,11 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   cardResumoValor: { fontSize: 26, fontWeight: 'bold' },
-  cardResumoLabel: { fontSize: 12, color: '#6B7280', fontWeight: '500' },
-  cardResumoSub: { fontSize: 11, color: '#9CA3AF' },
+  cardResumoLabel: { fontSize: 12, color: c.textoSec, fontWeight: '500' },
+  cardResumoSub: { fontSize: 11, color: c.textoTerc },
 
-  // Painel de estoque
   estoqueCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
@@ -327,28 +321,25 @@ const s = StyleSheet.create({
   },
   estoqueItem: { flex: 1, alignItems: 'center', gap: 4 },
   estoqueIcone: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  estoqueNumero: { fontSize: 18, fontWeight: 'bold', color: '#111827' },
-  estoqueLabel: { fontSize: 10, color: '#9CA3AF', textAlign: 'center' },
-  estoqueDivider: { width: 1, backgroundColor: '#F3F4F6', marginVertical: 8 },
+  estoqueNumero: { fontSize: 18, fontWeight: 'bold', color: c.texto },
+  estoqueLabel: { fontSize: 10, color: c.textoTerc, textAlign: 'center' },
+  estoqueDivider: { width: 1, backgroundColor: c.divisor, marginVertical: 8 },
 
-  // Histórico
   historicoHeader: { marginBottom: 8 },
-  contagemHistorico: { fontSize: 12, color: '#9CA3AF', marginBottom: 12 },
+  contagemHistorico: { fontSize: 12, color: c.textoTerc, marginBottom: 12 },
 
-  // Chips de tipo (menores, abaixo do título)
   chipTipo: {
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: c.cardBorda,
   },
-  chipTipoTexto: { fontSize: 12, fontWeight: '500', color: '#374151' },
+  chipTipoTexto: { fontSize: 12, fontWeight: '500', color: c.textoSec },
 
-  // Item do histórico
   item: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
@@ -370,16 +361,15 @@ const s = StyleSheet.create({
   },
   itemConteudo: { flex: 1 },
   itemLinha1: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  itemProduto: { fontSize: 14, fontWeight: '700', color: '#111827', flex: 1, marginRight: 8 },
+  itemProduto: { fontSize: 14, fontWeight: '700', color: c.texto, flex: 1, marginRight: 8 },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
   badgeTexto: { fontSize: 11, fontWeight: '700' },
-  itemSub: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
+  itemSub: { fontSize: 12, color: c.textoSec, marginBottom: 6 },
   itemRodape: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   itemQtd: { fontSize: 13, fontWeight: '700' },
-  itemData: { fontSize: 11, color: '#9CA3AF' },
-  itemUsuario: { fontSize: 11, color: '#9CA3AF', marginTop: 2 },
+  itemData: { fontSize: 11, color: c.textoTerc },
+  itemUsuario: { fontSize: 11, color: c.textoTerc, marginTop: 2 },
 
-  // Estado vazio
   vazio: { alignItems: 'center', paddingVertical: 40, gap: 12 },
-  vazioTexto: { fontSize: 14, color: '#9CA3AF' },
+  vazioTexto: { fontSize: 14, color: c.textoTerc },
 });

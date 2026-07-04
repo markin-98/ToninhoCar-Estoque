@@ -1,14 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
+  TouchableOpacity,
   FlatList,
   StyleSheet,
   ListRenderItem,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useProdutos } from '@/contexts/ProdutosContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 import { Produto } from '@/types';
 
 type Filtro = 'todos' | 'disponiveis' | 'baixo';
@@ -24,10 +26,18 @@ function getPercentualBarra(qty: number, min: number): number {
   return Math.min(qty / Math.max(min * 3, 1), 1);
 }
 
+const FILTROS: { key: Filtro; label: string }[] = [
+  { key: 'todos', label: 'Todos' },
+  { key: 'disponiveis', label: 'Disponíveis' },
+  { key: 'baixo', label: 'Estoque Baixo' },
+];
+
 export default function ProdutosFuncionarioScreen() {
   const { produtos } = useProdutos();
+  const { cores } = useTema();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todos');
+  const styles = useMemo(() => estilos(cores), [cores]);
 
   const produtosFiltrados = useMemo(() => {
     return produtos.filter((p) => {
@@ -74,12 +84,6 @@ export default function ProdutosFuncionarioScreen() {
     );
   };
 
-  const FILTROS: { key: Filtro; label: string }[] = [
-    { key: 'todos', label: 'Todos' },
-    { key: 'disponiveis', label: 'Disponíveis' },
-    { key: 'baixo', label: 'Estoque Baixo' },
-  ];
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -88,30 +92,29 @@ export default function ProdutosFuncionarioScreen() {
       </View>
 
       <View style={styles.buscaContainer}>
-        <Ionicons name="search-outline" size={18} color="#94A3B8" style={styles.buscaIcone} />
+        <Ionicons name="search-outline" size={18} color={cores.textoTerc} style={styles.buscaIcone} />
         <TextInput
           style={styles.buscaInput}
           value={busca}
           onChangeText={setBusca}
           placeholder="Buscar por nome ou código..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={cores.textoTerc}
           autoCorrect={false}
         />
       </View>
 
       <View style={styles.filtros}>
         {FILTROS.map((f) => (
-          <View
+          <TouchableOpacity
             key={f.key}
             style={[styles.chip, filtro === f.key && styles.chipAtivo]}
+            onPress={() => setFiltro(f.key)}
+            activeOpacity={0.7}
           >
-            <Text
-              style={[styles.chipTexto, filtro === f.key && styles.chipTextoAtivo]}
-              onPress={() => setFiltro(f.key)}
-            >
+            <Text style={[styles.chipTexto, filtro === f.key && styles.chipTextoAtivo]}>
               {f.label}
             </Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
 
@@ -123,7 +126,7 @@ export default function ProdutosFuncionarioScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.vazio}>
-            <Ionicons name="cube-outline" size={52} color="#CBD5E1" />
+            <Ionicons name="cube-outline" size={52} color={cores.textoTerc} />
             <Text style={styles.vazioTexto}>Nenhum produto encontrado</Text>
           </View>
         }
@@ -132,40 +135,40 @@ export default function ProdutosFuncionarioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16 },
-  titulo: { fontSize: 24, fontWeight: 'bold', color: '#1E293B' },
-  contagem: { fontSize: 13, color: '#94A3B8', marginTop: 2 },
+  titulo: { fontSize: 24, fontWeight: 'bold', color: c.texto },
+  contagem: { fontSize: 13, color: c.textoTerc, marginTop: 2 },
   buscaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: c.card,
     borderRadius: 12,
     marginHorizontal: 20,
     marginBottom: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: c.cardBorda,
   },
   buscaIcone: { marginRight: 8 },
-  buscaInput: { flex: 1, fontSize: 15, color: '#1E293B' },
+  buscaInput: { flex: 1, fontSize: 15, color: c.texto },
   filtros: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginBottom: 12 },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: c.inputFundo,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: c.cardBorda,
   },
-  chipAtivo: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
-  chipTexto: { fontSize: 13, color: '#64748B', fontWeight: '500' },
+  chipAtivo: { backgroundColor: c.primaria, borderColor: c.primaria },
+  chipTexto: { fontSize: 13, color: c.textoSec, fontWeight: '500' },
   chipTextoAtivo: { color: '#fff', fontWeight: '600' },
   lista: { paddingHorizontal: 20, paddingBottom: 24 },
   item: {
-    backgroundColor: '#fff',
+    backgroundColor: c.card,
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
@@ -177,14 +180,14 @@ const styles = StyleSheet.create({
   },
   itemTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
   itemInfo: { flex: 1, marginRight: 8 },
-  itemNome: { fontSize: 15, fontWeight: '600', color: '#1E293B' },
-  itemCodigo: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  itemNome: { fontSize: 15, fontWeight: '600', color: c.texto },
+  itemCodigo: { fontSize: 12, color: c.textoTerc, marginTop: 2 },
   itemDireita: { alignItems: 'flex-end' },
   itemQty: { fontSize: 15, fontWeight: '700' },
-  itemPreco: { fontSize: 12, color: '#64748B', marginTop: 2 },
-  barraFundo: { height: 6, backgroundColor: '#E2E8F0', borderRadius: 4, overflow: 'hidden' },
+  itemPreco: { fontSize: 12, color: c.textoSec, marginTop: 2 },
+  barraFundo: { height: 6, backgroundColor: c.barraFundo, borderRadius: 4, overflow: 'hidden' },
   barraPreenchimento: { height: '100%', borderRadius: 4 },
   avisoEstoque: { fontSize: 11, color: '#F59E0B', marginTop: 6, fontWeight: '500' },
   vazio: { alignItems: 'center', marginTop: 80, gap: 12 },
-  vazioTexto: { fontSize: 15, color: '#94A3B8' },
+  vazioTexto: { fontSize: 15, color: c.textoTerc },
 });

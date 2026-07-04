@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,32 +6,41 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
+import { mostrarAlerta } from '@/lib/alerta';
+import CampoSenha from '@/components/CampoSenha';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const { login, carregando } = useAuth();
+  const { cores } = useTema();
   const router = useRouter();
+  const styles = useMemo(() => estilos(cores), [cores]);
 
   async function handleLogin() {
     if (!email.trim() || !senha.trim()) {
-      Alert.alert('Atenção', 'Preencha o email e a senha para continuar.');
+      mostrarAlerta('Atenção', 'Preencha o usuário e a senha para continuar.');
       return;
     }
 
+    // Permite digitar só o usuário (ex: "joao") — o app completa @toninho.com.
+    const emailFinal = email.includes('@')
+      ? email.trim().toLowerCase()
+      : `${email.trim().toLowerCase()}@toninho.com`;
+
     try {
-      await login(email, senha);
+      await login(emailFinal, senha);
       // Redireciona para o index, que encaminha ao painel correto conforme o perfil
       router.replace('/');
     } catch (error) {
-      Alert.alert('Erro', error instanceof Error ? error.message : 'Erro ao fazer login.');
+      mostrarAlerta('Erro', error instanceof Error ? error.message : 'Erro ao fazer login.');
     }
   }
 
@@ -50,13 +59,13 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.formulario}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Usuário</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder="seu@email.com"
-            placeholderTextColor="#94A3B8"
+            placeholder="ex: joao"
+            placeholderTextColor={cores.textoTerc}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -64,13 +73,11 @@ export default function LoginScreen() {
           />
 
           <Text style={styles.label}>Senha</Text>
-          <TextInput
-            style={styles.input}
+          <CampoSenha
+            boxStyle={styles.input}
             value={senha}
             onChangeText={setSenha}
             placeholder="Digite sua senha"
-            placeholderTextColor="#94A3B8"
-            secureTextEntry
             editable={!carregando}
           />
 
@@ -81,28 +88,21 @@ export default function LoginScreen() {
             activeOpacity={0.8}
           >
             {carregando ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={cores.primariaTexto} />
             ) : (
               <Text style={styles.botaoTexto}>Entrar</Text>
             )}
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.dicaArea}>
-          <Text style={styles.dicaTitulo}>Acesso para teste:</Text>
-          <Text style={styles.dicaTexto}>admin@toninho.com — Administrador</Text>
-          <Text style={styles.dicaTexto}>func@toninho.com — Funcionário</Text>
-          <Text style={styles.dicaTexto}>Senha: 123456</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+const estilos = (c: Cores) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: c.fundo,
   },
   scroll: {
     flexGrow: 1,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 20,
-    backgroundColor: '#2563EB',
+    backgroundColor: c.primaria,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -130,15 +130,15 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1E293B',
+    color: c.texto,
   },
   subtitulo: {
     fontSize: 14,
-    color: '#64748B',
+    color: c.textoSec,
     marginTop: 4,
   },
   formulario: {
-    backgroundColor: '#fff',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 24,
     shadowColor: '#000',
@@ -151,22 +151,22 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: c.texto,
     marginBottom: 6,
     marginTop: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: c.cardBorda,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#1E293B',
-    backgroundColor: '#F8FAFC',
+    color: c.texto,
+    backgroundColor: c.inputFundo,
   },
   botao: {
-    backgroundColor: '#2563EB',
+    backgroundColor: c.primaria,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -179,19 +179,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
-  },
-  dicaArea: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  dicaTitulo: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#94A3B8',
-    marginBottom: 4,
-  },
-  dicaTexto: {
-    fontSize: 12,
-    color: '#94A3B8',
   },
 });

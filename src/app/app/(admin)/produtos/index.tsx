@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useProdutos } from '@/contexts/ProdutosContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 import { Produto } from '@/types';
 
 type Filtro = 'todos' | 'disponiveis' | 'baixo';
@@ -45,9 +46,11 @@ const FILTROS: { key: Filtro; label: string }[] = [
 
 export default function ProdutosScreen() {
   const { produtos } = useProdutos();
+  const { cores } = useTema();
   const router = useRouter();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todos');
+  const s = useMemo(() => estilos(cores), [cores]);
 
   const produtosFiltrados = useMemo(() => {
     return produtos.filter((p) => {
@@ -93,14 +96,14 @@ export default function ProdutosScreen() {
           </View>
         </View>
 
-        <Ionicons name="chevron-forward" size={16} color="#D1D5DB" style={{ marginLeft: 8 }} />
+        <Ionicons name="chevron-forward" size={16} color={cores.textoTerc} style={{ marginLeft: 8 }} />
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={s.container}>
-      {/* Header — mantido como estava */}
+      {/* Header */}
       <View style={s.header}>
         <Text style={s.titulo}>Produtos</Text>
         <Text style={s.contagem}>{produtosFiltrados.length} {produtosFiltrados.length === 1 ? 'item' : 'itens'}</Text>
@@ -108,18 +111,18 @@ export default function ProdutosScreen() {
 
       {/* Barra de busca pill */}
       <View style={s.buscaContainer}>
-        <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+        <Ionicons name="search-outline" size={18} color={cores.textoTerc} />
         <TextInput
           style={s.buscaInput}
           value={busca}
           onChangeText={setBusca}
           placeholder="Buscar por nome ou código..."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={cores.textoTerc}
           autoCorrect={false}
         />
         {busca !== '' && (
           <TouchableOpacity onPress={() => setBusca('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+            <Ionicons name="close-circle" size={18} color={cores.textoTerc} />
           </TouchableOpacity>
         )}
       </View>
@@ -153,13 +156,13 @@ export default function ProdutosScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={s.vazio}>
-            <Ionicons name="cube-outline" size={52} color="#D1D5DB" />
+            <Ionicons name="cube-outline" size={52} color={cores.textoTerc} />
             <Text style={s.vazioTexto}>Nenhum produto encontrado</Text>
           </View>
         }
       />
 
-      {/* FAB — fixo na tela, acima da tab bar */}
+      {/* FAB */}
       <TouchableOpacity
         style={s.fab}
         onPress={() => router.push('/(admin)/produtos/adicionar')}
@@ -171,23 +174,21 @@ export default function ProdutosScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
 
-  // Header
   header: {
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
   },
-  titulo: { fontSize: 24, fontWeight: 'bold', color: '#111827' },
-  contagem: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
+  titulo: { fontSize: 24, fontWeight: 'bold', color: c.texto },
+  contagem: { fontSize: 13, color: c.textoTerc, marginTop: 2 },
 
-  // Barra de busca estilo pill
   buscaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 24,
     marginHorizontal: 16,
     marginBottom: 12,
@@ -200,29 +201,26 @@ const s = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  buscaInput: { flex: 1, fontSize: 14, color: '#111827' },
+  buscaInput: { flex: 1, fontSize: 14, color: c.texto },
 
-  // Chips de filtro
   filtrosScroll: { flexGrow: 0, marginBottom: 12 },
   filtrosContent: { paddingHorizontal: 16, gap: 8 },
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: c.cardBorda,
   },
-  chipAtivo: { backgroundColor: '#3B82F6', borderColor: '#3B82F6' },
-  chipTexto: { fontSize: 13, fontWeight: '500', color: '#374151' },
+  chipAtivo: { backgroundColor: c.primaria, borderColor: c.primaria },
+  chipTexto: { fontSize: 13, fontWeight: '500', color: c.textoSec },
   chipTextoAtivo: { color: '#FFF', fontWeight: '600' },
 
-  // Lista
   lista: { paddingHorizontal: 16, paddingBottom: 100, gap: 10 },
 
-  // Card de produto — mesmo padrão do Dashboard
   itemCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
@@ -242,16 +240,14 @@ const s = StyleSheet.create({
     marginRight: 14,
   },
   itemConteudo: { flex: 1 },
-  itemNome: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 2 },
-  itemSub: { fontSize: 12, color: '#6B7280', marginBottom: 8 },
-  barraFundo: { height: 7, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
+  itemNome: { fontSize: 15, fontWeight: '700', color: c.texto, marginBottom: 2 },
+  itemSub: { fontSize: 12, color: c.textoSec, marginBottom: 8 },
+  barraFundo: { height: 7, backgroundColor: c.barraFundo, borderRadius: 4, overflow: 'hidden' },
   barraPreenchimento: { height: '100%', borderRadius: 4 },
 
-  // Estado vazio
   vazio: { alignItems: 'center', marginTop: 80, gap: 12 },
-  vazioTexto: { fontSize: 15, color: '#9CA3AF' },
+  vazioTexto: { fontSize: 15, color: c.textoTerc },
 
-  // FAB
   fab: {
     position: 'absolute',
     bottom: 88,
@@ -259,10 +255,10 @@ const s = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#3B82F6',
+    backgroundColor: c.primaria,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#3B82F6',
+    shadowColor: c.primaria,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 10,

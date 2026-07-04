@@ -1,5 +1,5 @@
 import DashboardView from '@/components/DashboardView';
 
 export default function AdminDashboard() {
-  return <DashboardView rotaProdutos="/(admin)/produtos" />;
+  return <DashboardView rotaProdutos="/(admin)/produtos" rotaEquipe="/(admin)/equipe" />;
 }

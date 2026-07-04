@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,15 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { mostrarAlerta } from '@/lib/alerta';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProdutos } from '@/contexts/ProdutosContext';
 import { useMovimentacoes } from '@/contexts/MovimentacoesContext';
+import { useTema, Cores } from '@/contexts/TemaContext';
 import { Produto, TipoMovimentacao, Movimentacao } from '@/types';
 
 const TIPOS: {
@@ -63,7 +64,7 @@ function formatarDataHora(iso: string): string {
   );
 }
 
-function ItemHistorico({ item }: { item: Movimentacao }) {
+function ItemHistorico({ item, s }: { item: Movimentacao; s: ReturnType<typeof estilos> }) {
   const cfg = TIPOS.find((t) => t.key === item.tipo)!;
   const sinal = item.tipo === 'entrada' ? '+' : '-';
 
@@ -93,6 +94,8 @@ export default function MovimentacoesView() {
   const { usuario } = useAuth();
   const { produtos, atualizarQuantidade } = useProdutos();
   const { movimentacoes, registrarMovimentacao } = useMovimentacoes();
+  const { cores } = useTema();
+  const s = useMemo(() => estilos(cores), [cores]);
 
   const [tipoAtivo, setTipoAtivo] = useState<TipoMovimentacao>('entrada');
   const [busca, setBusca] = useState('');
@@ -124,16 +127,16 @@ export default function MovimentacoesView() {
 
   function handleConfirmar() {
     if (!produtoSelecionado) {
-      Alert.alert('Atenção', 'Selecione um produto na busca.');
+      mostrarAlerta('Atenção', 'Selecione um produto na busca.');
       return;
     }
     const qty = parseInt(quantidade, 10);
     if (isNaN(qty) || qty <= 0) {
-      Alert.alert('Atenção', 'Informe uma quantidade válida (maior que zero).');
+      mostrarAlerta('Atenção', 'Informe uma quantidade válida (maior que zero).');
       return;
     }
     if (tipoAtivo !== 'entrada' && qty > produtoSelecionado.quantidade_atual) {
-      Alert.alert(
+      mostrarAlerta(
         'Estoque insuficiente',
         `Estoque de "${produtoSelecionado.nome}" é ${produtoSelecionado.quantidade_atual} un. Não é possível registrar ${qty} un.`,
       );
@@ -153,7 +156,7 @@ export default function MovimentacoesView() {
     atualizarQuantidade(produtoSelecionado.id, cfg.delta * qty);
 
     const labels = { entrada: 'Entrada registrada', saida: 'Saída registrada', baixa: 'Baixa registrada' };
-    Alert.alert('Sucesso', `${labels[tipoAtivo]}: ${qty} un. de "${produtoSelecionado.nome}".`, [
+    mostrarAlerta('Sucesso', `${labels[tipoAtivo]}: ${qty} un. de "${produtoSelecionado.nome}".`, [
       { text: 'OK', onPress: limpar },
     ]);
   }
@@ -169,7 +172,6 @@ export default function MovimentacoesView() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <Text style={s.titulo}>Movimentações</Text>
 
         {/* Seletor de tipo — 3 cards em linha */}
@@ -183,7 +185,7 @@ export default function MovimentacoesView() {
                   s.seletorCard,
                   ativo
                     ? { backgroundColor: t.cor, borderColor: t.cor }
-                    : { backgroundColor: '#FFF', borderColor: '#E5E7EB' },
+                    : { backgroundColor: cores.card, borderColor: cores.cardBorda },
                 ]}
                 onPress={() => { setTipoAtivo(t.key); limpar(); }}
                 activeOpacity={0.8}
@@ -191,7 +193,7 @@ export default function MovimentacoesView() {
                 <View style={[s.seletorIcone, { backgroundColor: ativo ? 'rgba(255,255,255,0.25)' : t.bg }]}>
                   <Ionicons name={t.icone} size={18} color={ativo ? '#FFF' : t.cor} />
                 </View>
-                <Text style={[s.seletorLabel, ativo ? { color: '#FFF', fontWeight: '700' } : { color: '#374151' }]}>
+                <Text style={[s.seletorLabel, ativo ? { color: '#FFF', fontWeight: '700' } : { color: cores.textoSec }]}>
                   {t.label}
                 </Text>
               </TouchableOpacity>
@@ -205,29 +207,27 @@ export default function MovimentacoesView() {
           <Text style={[s.descricaoTexto, { color: cfg.cor }]}>{cfg.descricao}</Text>
         </View>
 
-        {/* Formulário dentro de card branco */}
+        {/* Formulário dentro de card */}
         <View style={s.formCard}>
 
-          {/* Busca de produto */}
           <Text style={s.label}>Produto</Text>
           <View style={[s.buscaContainer, produtoSelecionado && { borderColor: cfg.cor }]}>
-            <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+            <Ionicons name="search-outline" size={18} color={cores.textoTerc} />
             <TextInput
               style={s.buscaInput}
               value={busca}
               onChangeText={(t) => { setBusca(t); setProdutoSelecionado(null); }}
               placeholder="Buscar por nome ou código..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={cores.textoTerc}
               autoCorrect={false}
             />
             {(busca !== '' || produtoSelecionado) && (
               <TouchableOpacity onPress={limpar} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                <Ionicons name="close-circle" size={18} color={cores.textoTerc} />
               </TouchableOpacity>
             )}
           </View>
 
-          {/* Dropdown de resultados */}
           {resultadosBusca.length > 0 && (
             <View style={s.dropdown}>
               {resultadosBusca.map((p, i) => (
@@ -244,7 +244,6 @@ export default function MovimentacoesView() {
             </View>
           )}
 
-          {/* Card do produto selecionado */}
           {produtoSelecionado && (
             <View style={[s.produtoSelecionado, { borderColor: cfg.cor + '40' }]}>
               <View style={[s.produtoSelecionadoIcone, { backgroundColor: cfg.bg }]}>
@@ -268,18 +267,16 @@ export default function MovimentacoesView() {
             </View>
           )}
 
-          {/* Quantidade */}
           <Text style={[s.label, { marginTop: 16 }]}>Quantidade</Text>
           <TextInput
             style={[s.input, { borderColor: cfg.cor + '60' }]}
             value={quantidade}
             onChangeText={setQuantidade}
             placeholder="0"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={cores.textoTerc}
             keyboardType="numeric"
           />
 
-          {/* Motivo */}
           <Text style={[s.label, { marginTop: 16 }]}>
             {tipoAtivo === 'baixa' ? 'Motivo da baixa' : 'Observação (opcional)'}
           </Text>
@@ -294,13 +291,12 @@ export default function MovimentacoesView() {
                 ? 'Ex: Substituição veículo ABC-1234'
                 : 'Ex: Peças danificadas na entrega'
             }
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={cores.textoTerc}
             multiline
             numberOfLines={2}
             textAlignVertical="top"
           />
 
-          {/* Botão confirmar */}
           <TouchableOpacity
             style={[s.botao, { backgroundColor: cfg.cor }]}
             onPress={handleConfirmar}
@@ -319,13 +315,13 @@ export default function MovimentacoesView() {
 
         {movimentacoes.length === 0 ? (
           <View style={s.vazio}>
-            <Ionicons name="document-text-outline" size={44} color="#D1D5DB" />
+            <Ionicons name="document-text-outline" size={44} color={cores.textoTerc} />
             <Text style={s.vazioTexto}>Nenhuma movimentação registrada.</Text>
           </View>
         ) : (
           <View style={{ gap: 10 }}>
             {movimentacoes.slice(0, 15).map((m) => (
-              <ItemHistorico key={m.id} item={m} />
+              <ItemHistorico key={m.id} item={m} s={s} />
             ))}
           </View>
         )}
@@ -334,13 +330,12 @@ export default function MovimentacoesView() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+const estilos = (c: Cores) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.fundo },
   conteudo: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 40 },
 
-  titulo: { fontSize: 24, fontWeight: 'bold', color: '#111827', marginBottom: 20 },
+  titulo: { fontSize: 24, fontWeight: 'bold', color: c.texto, marginBottom: 20 },
 
-  // Seletor de tipo
   seletor: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   seletorCard: {
     flex: 1,
@@ -359,7 +354,6 @@ const s = StyleSheet.create({
   },
   seletorLabel: { fontSize: 13, fontWeight: '500' },
 
-  // Descrição do tipo
   descricaoCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -371,9 +365,8 @@ const s = StyleSheet.create({
   },
   descricaoTexto: { fontSize: 13, fontWeight: '500', flex: 1 },
 
-  // Card do formulário
   formCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 20,
     padding: 16,
     marginBottom: 24,
@@ -384,29 +377,27 @@ const s = StyleSheet.create({
     elevation: 2,
   },
 
-  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
+  label: { fontSize: 13, fontWeight: '600', color: c.texto, marginBottom: 8 },
 
-  // Busca
   buscaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: c.inputFundo,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 11,
     borderWidth: 1.5,
-    borderColor: '#E5E7EB',
+    borderColor: c.cardBorda,
     gap: 8,
     marginBottom: 4,
   },
-  buscaInput: { flex: 1, fontSize: 14, color: '#111827' },
+  buscaInput: { flex: 1, fontSize: 14, color: c.texto },
 
-  // Dropdown
   dropdown: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: c.cardBorda,
     marginTop: 4,
     marginBottom: 4,
     overflow: 'hidden',
@@ -417,15 +408,14 @@ const s = StyleSheet.create({
     elevation: 3,
   },
   dropdownItem: { paddingHorizontal: 14, paddingVertical: 12 },
-  dropdownDivider: { borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
-  dropdownNome: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  dropdownSub: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  dropdownDivider: { borderBottomWidth: 1, borderBottomColor: c.divisor },
+  dropdownNome: { fontSize: 14, fontWeight: '600', color: c.texto },
+  dropdownSub: { fontSize: 12, color: c.textoTerc, marginTop: 2 },
 
-  // Produto selecionado
   produtoSelecionado: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: c.inputFundo,
     borderRadius: 12,
     borderWidth: 1.5,
     padding: 12,
@@ -439,26 +429,24 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  produtoNome: { fontSize: 14, fontWeight: '700', color: '#111827' },
-  produtoCodigo: { fontSize: 12, color: '#9CA3AF', marginTop: 1 },
+  produtoNome: { fontSize: 14, fontWeight: '700', color: c.texto },
+  produtoCodigo: { fontSize: 12, color: c.textoTerc, marginTop: 1 },
   avisoEstoque: { fontSize: 11, color: '#D97706', fontWeight: '500', marginTop: 3 },
   produtoEstoqueBloco: { alignItems: 'flex-end' },
-  produtoEstoqueLabel: { fontSize: 11, color: '#9CA3AF' },
+  produtoEstoqueLabel: { fontSize: 11, color: c.textoTerc },
   produtoEstoqueValor: { fontSize: 18, fontWeight: '800', marginTop: 1 },
 
-  // Inputs
   input: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: c.inputFundo,
     borderWidth: 1.5,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#111827',
+    color: c.texto,
   },
   inputMulti: { height: 76, paddingTop: 12, textAlignVertical: 'top' },
 
-  // Botão confirmar
   botao: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -470,13 +458,11 @@ const s = StyleSheet.create({
   },
   botaoTexto: { color: '#FFF', fontSize: 16, fontWeight: '700' },
 
-  // Histórico
   historicoHeader: { marginBottom: 12 },
-  historicoTitulo: { fontSize: 18, fontWeight: 'bold', color: '#111827' },
+  historicoTitulo: { fontSize: 18, fontWeight: 'bold', color: c.texto },
 
-  // Item do histórico — padrão dos outros cards
   itemCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: c.card,
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
@@ -503,15 +489,14 @@ const s = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  itemNome: { fontSize: 14, fontWeight: '700', color: '#111827', flex: 1, marginRight: 8 },
+  itemNome: { fontSize: 14, fontWeight: '700', color: c.texto, flex: 1, marginRight: 8 },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
   badgeTexto: { fontSize: 11, fontWeight: '700' },
-  itemMotivo: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
+  itemMotivo: { fontSize: 12, color: c.textoSec, marginBottom: 6 },
   itemRodape: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   itemQtd: { fontSize: 13, fontWeight: '700' },
-  itemData: { fontSize: 11, color: '#9CA3AF' },
+  itemData: { fontSize: 11, color: c.textoTerc },
 
-  // Vazio
   vazio: { alignItems: 'center', paddingVertical: 40, gap: 12 },
-  vazioTexto: { fontSize: 14, color: '#9CA3AF' },
+  vazioTexto: { fontSize: 14, color: c.textoTerc },
 });
