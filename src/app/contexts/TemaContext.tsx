@@ -58,6 +58,32 @@ const ESCURO: Cores = {
   overlay: 'rgba(0,0,0,0.6)',
 };
 
+// WEB: configura o PWA (tela cheia ao adicionar à tela inicial), respeita o
+// notch e IMPEDE a rolagem horizontal. Roda uma única vez. O APK ignora.
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const addMeta = (name: string, content: string) => {
+    if (document.querySelector(`meta[name="${name}"]`)) return;
+    const m = document.createElement('meta');
+    m.name = name;
+    m.content = content;
+    document.head.appendChild(m);
+  };
+  addMeta('apple-mobile-web-app-capable', 'yes');
+  addMeta('mobile-web-app-capable', 'yes');
+  addMeta('apple-mobile-web-app-status-bar-style', 'black-translucent');
+  const vp = document.querySelector('meta[name="viewport"]');
+  if (vp && !/viewport-fit/.test(vp.getAttribute('content') || '')) {
+    vp.setAttribute('content', `${vp.getAttribute('content') || ''}, viewport-fit=cover`);
+  }
+  if (!document.getElementById('tc-web-css')) {
+    const st = document.createElement('style');
+    st.id = 'tc-web-css';
+    st.textContent =
+      'html,body,#root{height:100%}@supports(height:100dvh){html,body,#root{height:100dvh}}html,body{overflow-x:hidden;overscroll-behavior:none;max-width:100%}';
+    document.head.appendChild(st);
+  }
+}
+
 type TemaContextData = {
   modo: ModoTema;             // escolha do usuário (claro/escuro/sistema)
   esquema: Esquema;           // tema efetivo aplicado agora
@@ -94,6 +120,13 @@ export function TemaProvider({ children }: { children: ReactNode }) {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
     document.documentElement.style.backgroundColor = cores.fundo;
     document.body.style.backgroundColor = cores.fundo;
+    let tc = document.querySelector('meta[name="theme-color"]');
+    if (!tc) {
+      tc = document.createElement('meta');
+      tc.setAttribute('name', 'theme-color');
+      document.head.appendChild(tc);
+    }
+    tc.setAttribute('content', cores.fundo);
   }, [cores.fundo]);
 
   return (

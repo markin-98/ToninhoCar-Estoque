@@ -29,7 +29,7 @@ export default function FuncionarioLayout() {
         tabBarActiveTintColor: cores.primaria,
         tabBarInactiveTintColor: cores.textoTerc,
         tabBarStyle: { backgroundColor: cores.card, borderTopColor: cores.cardBorda },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 9, fontWeight: '600' },
       }}
     >
       <Tabs.Screen
