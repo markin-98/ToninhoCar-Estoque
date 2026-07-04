@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { FichaCarro, ItemFicha } from '@/types';
 
 type NovaFicha = Omit<FichaCarro, 'id' | 'data_atendimento' | 'status' | 'itens'>;
@@ -44,6 +45,7 @@ const FichasContext = createContext<FichasContextData>({} as FichasContextData);
 
 export function FichasProvider({ children }: { children: ReactNode }) {
   const [fichas, setFichas] = useState<FichaCarro[]>([]);
+  const emailUsuario = useAuth().usuario?.email ?? null;
 
   async function carregar() {
     const { data } = await supabase
@@ -53,7 +55,17 @@ export function FichasProvider({ children }: { children: ReactNode }) {
     if (data) setFichas((data as FichaRow[]).map(mapRow));
   }
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    // Só carrega depois que o usuário está logado (necessário quando o RLS está ativo).
+    if (!emailUsuario) { setFichas([]); return; }
+    carregar();
+    // Tempo real: recarrega quando qualquer dispositivo altera a tabela.
+    const canal = supabase
+      .channel('ficha-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ficha_carro' }, () => carregar())
+      .subscribe();
+    return () => { supabase.removeChannel(canal); };
+  }, [emailUsuario]);
 
   function criarFicha(data: NovaFicha): number {
     const idTemp = Date.now();

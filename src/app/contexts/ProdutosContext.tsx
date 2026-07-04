@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { Produto, ProdutoFormData } from '@/types';
 
 type ProdutosContextData = {
@@ -40,6 +41,7 @@ const ProdutosContext = createContext<ProdutosContextData>({} as ProdutosContext
 
 export function ProdutosProvider({ children }: { children: ReactNode }) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const emailUsuario = useAuth().usuario?.email ?? null;
 
   async function carregar() {
     const { data } = await supabase
@@ -49,7 +51,17 @@ export function ProdutosProvider({ children }: { children: ReactNode }) {
     if (data) setProdutos((data as ProdutoRow[]).map(mapRow));
   }
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    // Só carrega depois que o usuário está logado (necessário quando o RLS está ativo).
+    if (!emailUsuario) { setProdutos([]); return; }
+    carregar();
+    // Tempo real: recarrega quando qualquer dispositivo altera a tabela.
+    const canal = supabase
+      .channel('produto-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'produto' }, () => carregar())
+      .subscribe();
+    return () => { supabase.removeChannel(canal); };
+  }, [emailUsuario]);
 
   const proximoCodigo = `PROD-${String(produtos.length + 1).padStart(3, '0')}`;
 

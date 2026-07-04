@@ -44,11 +44,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Complementa os dados com a tabela `usuario` (fonte oficial do perfil).
+  // Se a tabela ainda não existir no banco, mantém o que veio do metadata.
+  useEffect(() => {
+    if (!usuario?.email) return;
+    supabase
+      .from('usuario')
+      .select('nome, perfil, ativo')
+      .eq('email', usuario.email)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        if (!data.ativo) {
+          // Usuário desativado pela administradora: encerra a sessão.
+          supabase.auth.signOut();
+          setUsuario(null);
+          return;
+        }
+        setUsuario((atual) =>
+          atual && (atual.nome !== data.nome || atual.perfil !== data.perfil)
+            ? { ...atual, nome: data.nome, perfil: data.perfil === 'admin' ? 'admin' : 'funcionario' }
+            : atual,
+        );
+      });
+  }, [usuario?.email]);
+
   async function login(email: string, senha: string): Promise<void> {
     setCarregando(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    if (error) {
+      setCarregando(false);
+      throw new Error('Usuário ou senha inválidos.');
+    }
+
+    // Verifica ANTES de liberar a entrada se o acesso está ativo.
+    // Usuário desativado é deslogado na hora e recebe a mensagem de erro,
+    // sem chegar a entrar no app.
+    const { data } = await supabase
+      .from('usuario')
+      .select('ativo')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (data && data.ativo === false) {
+      await supabase.auth.signOut();
+      setUsuario(null);
+      setCarregando(false);
+      throw new Error('Este acesso foi desativado pela administração. Fale com o responsável da oficina.');
+    }
+
     setCarregando(false);
-    if (error) throw new Error('Email ou senha inválidos.');
   }
 
   function logout() {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { Movimentacao, TipoMovimentacao } from '@/types';
 
 type NovaMovimentacao = Omit<Movimentacao, 'id'>;
@@ -37,6 +38,7 @@ const MovimentacoesContext = createContext<MovimentacoesContextData>({} as Movim
 
 export function MovimentacoesProvider({ children }: { children: ReactNode }) {
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
+  const emailUsuario = useAuth().usuario?.email ?? null;
 
   async function carregar() {
     const { data } = await supabase
@@ -46,7 +48,17 @@ export function MovimentacoesProvider({ children }: { children: ReactNode }) {
     if (data) setMovimentacoes((data as MovimentacaoRow[]).map(mapRow));
   }
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    // Só carrega depois que o usuário está logado (necessário quando o RLS está ativo).
+    if (!emailUsuario) { setMovimentacoes([]); return; }
+    carregar();
+    // Tempo real: recarrega quando qualquer dispositivo altera a tabela.
+    const canal = supabase
+      .channel('movimentacao-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'movimentacao' }, () => carregar())
+      .subscribe();
+    return () => { supabase.removeChannel(canal); };
+  }, [emailUsuario]);
 
   function registrarMovimentacao(data: NovaMovimentacao) {
     const nova: Movimentacao = { ...data, id: Date.now() };
