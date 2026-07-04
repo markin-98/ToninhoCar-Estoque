@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { mostrarAlerta } from '@/lib/alerta';
 import CampoSenha from '@/components/CampoSenha';
+import AvisoInstalar from '@/components/AvisoInstalar';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTema, Cores } from '@/contexts/TemaContext';
@@ -94,6 +95,8 @@ export default function LoginScreen() {
             )}
           </TouchableOpacity>
         </View>
+
+        <AvisoInstalar />
       </ScrollView>
     </KeyboardAvoidingView>
   );

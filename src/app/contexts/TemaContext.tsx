@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ModoTema = 'claro' | 'escuro' | 'sistema';
@@ -87,6 +87,14 @@ export function TemaProvider({ children }: { children: ReactNode }) {
 
   const esquema: Esquema = modo === 'sistema' ? (sistema === 'dark' ? 'escuro' : 'claro') : modo;
   const cores = esquema === 'escuro' ? ESCURO : CLARO;
+
+  // WEB: pinta o fundo da página (html/body) com a cor do tema, evitando as
+  // "faixas brancas" nas áreas que o app não desenha (ex.: safe area do iPhone).
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    document.documentElement.style.backgroundColor = cores.fundo;
+    document.body.style.backgroundColor = cores.fundo;
+  }, [cores.fundo]);
 
   return (
     <TemaContext.Provider value={{ modo, esquema, cores, definirModo }}>
