@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { mostrarAlerta } from '@/lib/alerta';
+import { aplicarMudanca, MudancaPostgres } from '@/lib/realtime';
 import { Movimentacao, TipoMovimentacao } from '@/types';
 
 type NovaMovimentacao = Omit<Movimentacao, 'id'>;
@@ -53,18 +54,20 @@ export function MovimentacoesProvider({ children }: { children: ReactNode }) {
     // Só carrega depois que o usuário está logado (necessário quando o RLS está ativo).
     if (!emailUsuario) { setMovimentacoes([]); return; }
     carregar();
-    // Tempo real: recarrega quando qualquer dispositivo altera a tabela.
+    // Tempo real: aplica só a movimentação nova (economiza banda; não recarrega tudo).
     const canal = supabase
       .channel('movimentacao-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'movimentacao' }, () => carregar())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'movimentacao' }, (payload) =>
+        setMovimentacoes((prev) => aplicarMudanca(prev, payload as unknown as MudancaPostgres, mapRow, 'id_movimentacao')),
+      )
       .subscribe();
     return () => { supabase.removeChannel(canal); };
   }, [emailUsuario]);
 
   async function registrarMovimentacao(data: NovaMovimentacao) {
-    const nova: Movimentacao = { ...data, id: Date.now() };
-    setMovimentacoes((prev) => [nova, ...prev]);
-    const { error } = await supabase.from('movimentacao').insert({
+    // Insere e recebe a linha com o id real; adiciona ao estado (o eco do
+    // Realtime é deduplicado pelo id, então não duplica).
+    const { data: inserida, error } = await supabase.from('movimentacao').insert({
       id_produto: data.id_produto,
       nome_produto: data.nome_produto,
       nome_usuario: data.nome_usuario,
@@ -72,9 +75,13 @@ export function MovimentacoesProvider({ children }: { children: ReactNode }) {
       quantidade: data.quantidade,
       data_hora: data.data_hora,
       motivo: data.motivo,
-    });
-    if (error) mostrarAlerta('Erro', 'Não foi possível registrar a movimentação.');
-    await carregar();
+    }).select().single();
+    if (error || !inserida) {
+      mostrarAlerta('Erro', 'Não foi possível registrar a movimentação.');
+      return;
+    }
+    const nova = mapRow(inserida as MovimentacaoRow);
+    setMovimentacoes((prev) => (prev.some((m) => m.id === nova.id) ? prev : [nova, ...prev]));
   }
 
   return (

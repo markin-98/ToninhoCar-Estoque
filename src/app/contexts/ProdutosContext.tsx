@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { mostrarAlerta } from '@/lib/alerta';
+import { aplicarMudanca, MudancaPostgres } from '@/lib/realtime';
 import { Produto, ProdutoFormData } from '@/types';
 
 type ProdutosContextData = {
@@ -56,10 +57,12 @@ export function ProdutosProvider({ children }: { children: ReactNode }) {
     // Só carrega depois que o usuário está logado (necessário quando o RLS está ativo).
     if (!emailUsuario) { setProdutos([]); return; }
     carregar();
-    // Tempo real: recarrega quando qualquer dispositivo altera a tabela.
+    // Tempo real: aplica só a linha alterada (economiza banda; não recarrega tudo).
     const canal = supabase
       .channel('produto-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'produto' }, () => carregar())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'produto' }, (payload) =>
+        setProdutos((prev) => aplicarMudanca(prev, payload as unknown as MudancaPostgres, mapRow, 'id_produto')),
+      )
       .subscribe();
     return () => { supabase.removeChannel(canal); };
   }, [emailUsuario]);
@@ -67,18 +70,22 @@ export function ProdutosProvider({ children }: { children: ReactNode }) {
   const proximoCodigo = `PROD-${String(produtos.length + 1).padStart(3, '0')}`;
 
   async function adicionarProduto(data: ProdutoFormData) {
-    const temp: Produto = { ...data, id: Date.now(), data_cadastro: new Date().toISOString().split('T')[0] };
-    setProdutos((prev) => [temp, ...prev]);
-    const { error } = await supabase.from('produto').insert({
+    // Insere e recebe a linha com o id real; adiciona ao estado (o eco do
+    // Realtime é deduplicado pelo id, então não duplica).
+    const { data: inserido, error } = await supabase.from('produto').insert({
       codigo: data.codigo,
       nome: data.nome,
       descricao: data.descricao,
       quantidade_atual: data.quantidade_atual,
       preco_atual: data.preco_atual,
       estoque_minimo: data.estoque_minimo,
-    });
-    if (error) mostrarAlerta('Erro', 'Não foi possível cadastrar o produto. Verifique as permissões.');
-    await carregar();
+    }).select().single();
+    if (error || !inserido) {
+      mostrarAlerta('Erro', 'Não foi possível cadastrar o produto. Verifique as permissões.');
+      return;
+    }
+    const novo = mapRow(inserido as ProdutoRow);
+    setProdutos((prev) => (prev.some((p) => p.id === novo.id) ? prev : [novo, ...prev]));
   }
 
   async function editarProduto(id: number, data: ProdutoFormData) {
@@ -91,8 +98,10 @@ export function ProdutosProvider({ children }: { children: ReactNode }) {
       preco_atual: data.preco_atual,
       estoque_minimo: data.estoque_minimo,
     }).eq('id_produto', id);
-    if (error) mostrarAlerta('Erro', 'Não foi possível salvar o produto. Verifique as permissões.');
-    await carregar();
+    if (error) {
+      await carregar();
+      mostrarAlerta('Erro', 'Não foi possível salvar o produto. Verifique as permissões.');
+    }
   }
 
   async function excluirProduto(id: number) {

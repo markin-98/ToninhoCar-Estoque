@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { mostrarAlerta } from '@/lib/alerta';
+import { aplicarMudanca, MudancaPostgres } from '@/lib/realtime';
 import { FichaCarro, ItemFicha } from '@/types';
 
 type NovaFicha = Omit<FichaCarro, 'id' | 'data_atendimento' | 'status' | 'itens'>;
@@ -60,10 +61,12 @@ export function FichasProvider({ children }: { children: ReactNode }) {
     // Só carrega depois que o usuário está logado (necessário quando o RLS está ativo).
     if (!emailUsuario) { setFichas([]); return; }
     carregar();
-    // Tempo real: recarrega quando qualquer dispositivo altera a tabela.
+    // Tempo real: aplica só a ficha alterada (economiza banda; não recarrega tudo).
     const canal = supabase
       .channel('ficha-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ficha_carro' }, () => carregar())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ficha_carro' }, (payload) =>
+        setFichas((prev) => aplicarMudanca(prev, payload as unknown as MudancaPostgres, mapRow, 'id_ficha')),
+      )
       .subscribe();
     return () => { supabase.removeChannel(canal); };
   }, [emailUsuario]);
@@ -99,9 +102,7 @@ export function FichasProvider({ children }: { children: ReactNode }) {
       // Não persistiu (ex.: regra de acesso). Recarrega para refletir o estado real do banco.
       await carregar();
       mostrarAlerta('Erro', 'Não foi possível salvar a alteração. Verifique sua conexão e as permissões.');
-      return;
     }
-    await carregar();
   }
 
   async function excluirFicha(id: number) {
@@ -126,9 +127,7 @@ export function FichasProvider({ children }: { children: ReactNode }) {
     if (error) {
       await carregar();
       mostrarAlerta('Erro', 'Não foi possível adicionar a peça. Verifique as permissões.');
-      return;
     }
-    await carregar();
   }
 
   async function removerItem(id_ficha: number, id_item: number) {
@@ -140,9 +139,7 @@ export function FichasProvider({ children }: { children: ReactNode }) {
     if (error) {
       await carregar();
       mostrarAlerta('Erro', 'Não foi possível remover a peça. Verifique as permissões.');
-      return;
     }
-    await carregar();
   }
 
   return (
