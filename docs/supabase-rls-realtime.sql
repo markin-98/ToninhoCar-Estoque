@@ -66,24 +66,16 @@ create policy "usuario_leitura_logado"
   using (true);
 
 --   Escrita/gestão da equipe: apenas administradores.
---   Considera admin quem tem perfil 'admin' na tabela usuario.
+--   IMPORTANTE: checa o perfil pelo token de login (user_metadata) e NÃO pela
+--   tabela usuario. Consultar a própria tabela dentro da política dela causa
+--   recursão infinita no RLS e derruba toda leitura da tabela.
 drop policy if exists "usuario_gestao_admin" on public.usuario;
 create policy "usuario_gestao_admin"
   on public.usuario
   for all
   to authenticated
-  using (
-    exists (
-      select 1 from public.usuario u
-      where u.email = auth.jwt() ->> 'email' and u.perfil = 'admin'
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.usuario u
-      where u.email = auth.jwt() ->> 'email' and u.perfil = 'admin'
-    )
-  );
+  using (coalesce(auth.jwt() -> 'user_metadata' ->> 'perfil', '') = 'admin')
+  with check (coalesce(auth.jwt() -> 'user_metadata' ->> 'perfil', '') = 'admin');
 
 -- 4) Tempo real: publica as tabelas na publicação do Realtime ---------------
 --    (ignora o erro caso a tabela já esteja publicada)
