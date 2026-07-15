@@ -35,9 +35,9 @@ function getPercentualBarra(quantidade: number, minimo: number) {
   return Math.min(quantidade / Math.max(minimo * 3, 1), 1);
 }
 
-type Props = { rotaProdutos: string; rotaEquipe?: string };
+type Props = { rotaProdutos: string; rotaEquipe?: string; mostrarMetricas?: boolean };
 
-export default function DashboardView({ rotaProdutos, rotaEquipe }: Props) {
+export default function DashboardView({ rotaProdutos, rotaEquipe, mostrarMetricas = true }: Props) {
   const { usuario, logout } = useAuth();
   const { produtos } = useProdutos();
   const { cores } = useTema();
@@ -76,53 +76,58 @@ export default function DashboardView({ rotaProdutos, rotaEquipe }: Props) {
       </View>
 
       {/* Cards de métricas verticais */}
+      {(mostrarMetricas || rotaEquipe) && (
       <View style={s.secaoCards}>
 
-        {/* Card 1: Total de produtos */}
-        <View style={s.card}>
-          <View style={s.cardConteudo}>
-            <Text style={s.cardTitulo}>Produtos Cadastrados</Text>
-            <Text style={s.cardValor}>{totalProdutos}</Text>
-            <Text style={[s.cardIndicador, { color: '#10B981' }]}>
-              ↑ {totalProdutos} {totalProdutos === 1 ? 'produto' : 'produtos'} no estoque
-            </Text>
-          </View>
-          <View style={[s.cardIcone, { backgroundColor: '#DBEAFE' }]}>
-            <Ionicons name="cube-outline" size={22} color="#3B82F6" />
-          </View>
-        </View>
-
-        {/* Card 2: Estoque baixo */}
-        <View style={s.card}>
-          <View style={s.cardConteudo}>
-            <Text style={s.cardTitulo}>Em Estoque Baixo</Text>
-            <Text style={s.cardValor}>{estoqueBaixo}</Text>
-            {estoqueBaixo === 0 ? (
-              <Text style={[s.cardIndicador, { color: '#10B981' }]}>↓ Tudo em dia</Text>
-            ) : (
-              <Text style={[s.cardIndicador, { color: '#EF4444' }]}>
-                ↑ {estoqueBaixo} {estoqueBaixo === 1 ? 'produto' : 'produtos'} em alerta
+        {mostrarMetricas && (
+          <>
+          {/* Card 1: Total de produtos */}
+          <View style={s.card}>
+            <View style={s.cardConteudo}>
+              <Text style={s.cardTitulo}>Produtos Cadastrados</Text>
+              <Text style={s.cardValor}>{totalProdutos}</Text>
+              <Text style={[s.cardIndicador, { color: '#10B981' }]}>
+                ↑ {totalProdutos} {totalProdutos === 1 ? 'produto' : 'produtos'} no estoque
               </Text>
-            )}
+            </View>
+            <View style={[s.cardIcone, { backgroundColor: '#DBEAFE' }]}>
+              <Ionicons name="cube-outline" size={22} color="#3B82F6" />
+            </View>
           </View>
-          <View style={[s.cardIcone, { backgroundColor: '#FEE2E2' }]}>
-            <Ionicons name="warning-outline" size={22} color="#EF4444" />
-          </View>
-        </View>
 
-        {/* Card 3: Valor total em estoque */}
-        <View style={s.card}>
-          <View style={s.cardConteudo}>
-            <Text style={s.cardTitulo}>Valor em Estoque</Text>
-            <Text style={[s.cardValor, { fontSize: 24 }]}>
-              {valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </Text>
-            <Text style={[s.cardIndicador, { color: '#10B981' }]}>↑ Valor total atualizado</Text>
+          {/* Card 2: Estoque baixo */}
+          <View style={s.card}>
+            <View style={s.cardConteudo}>
+              <Text style={s.cardTitulo}>Em Estoque Baixo</Text>
+              <Text style={s.cardValor}>{estoqueBaixo}</Text>
+              {estoqueBaixo === 0 ? (
+                <Text style={[s.cardIndicador, { color: '#10B981' }]}>↓ Tudo em dia</Text>
+              ) : (
+                <Text style={[s.cardIndicador, { color: '#EF4444' }]}>
+                  ↑ {estoqueBaixo} {estoqueBaixo === 1 ? 'produto' : 'produtos'} em alerta
+                </Text>
+              )}
+            </View>
+            <View style={[s.cardIcone, { backgroundColor: '#FEE2E2' }]}>
+              <Ionicons name="warning-outline" size={22} color="#EF4444" />
+            </View>
           </View>
-          <View style={[s.cardIcone, { backgroundColor: '#D1FAE5' }]}>
-            <Ionicons name="cash-outline" size={22} color="#10B981" />
+
+          {/* Card 3: Valor total em estoque */}
+          <View style={s.card}>
+            <View style={s.cardConteudo}>
+              <Text style={s.cardTitulo}>Valor em Estoque</Text>
+              <Text style={[s.cardValor, { fontSize: 24 }]}>
+                {valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </Text>
+              <Text style={[s.cardIndicador, { color: '#10B981' }]}>↑ Valor total atualizado</Text>
+            </View>
+            <View style={[s.cardIcone, { backgroundColor: '#D1FAE5' }]}>
+              <Ionicons name="cash-outline" size={22} color="#10B981" />
+            </View>
           </View>
-        </View>
+          </>
+        )}
 
         {/* Card 4: Gestão da equipe (apenas admin) */}
         {rotaEquipe && (
@@ -145,6 +150,7 @@ export default function DashboardView({ rotaProdutos, rotaEquipe }: Props) {
         )}
 
       </View>
+      )}
 
       {/* Título da seção de produtos */}
       <View style={s.secaoHeader}>
