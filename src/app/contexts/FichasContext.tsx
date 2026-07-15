@@ -1,18 +1,19 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { mostrarAlerta } from '@/lib/alerta';
 import { FichaCarro, ItemFicha } from '@/types';
 
 type NovaFicha = Omit<FichaCarro, 'id' | 'data_atendimento' | 'status' | 'itens'>;
 
 type FichasContextData = {
   fichas: FichaCarro[];
-  criarFicha: (data: NovaFicha) => number;
-  atualizarFicha: (id: number, data: Partial<Pick<FichaCarro, 'status' | 'observacoes'>>) => void;
-  excluirFicha: (id: number) => void;
+  criarFicha: (data: NovaFicha) => Promise<number | null>;
+  atualizarFicha: (id: number, data: Partial<Pick<FichaCarro, 'status' | 'observacoes'>>) => Promise<void>;
+  excluirFicha: (id: number) => Promise<void>;
   buscarPorId: (id: number) => FichaCarro | undefined;
-  adicionarItem: (id_ficha: number, item: Omit<ItemFicha, 'id'>) => void;
-  removerItem: (id_ficha: number, id_item: number) => void;
+  adicionarItem: (id_ficha: number, item: Omit<ItemFicha, 'id'>) => Promise<void>;
+  removerItem: (id_ficha: number, id_item: number) => Promise<void>;
 };
 
 type FichaRow = {
@@ -67,61 +68,81 @@ export function FichasProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(canal); };
   }, [emailUsuario]);
 
-  function criarFicha(data: NovaFicha): number {
-    const idTemp = Date.now();
-    const nova: FichaCarro = {
-      ...data,
-      id: idTemp,
-      data_atendimento: new Date().toISOString(),
-      status: 'aberta',
-      itens: [],
-    };
-    setFichas((prev) => [nova, ...prev]);
-    supabase.from('ficha_carro').insert({
-      placa: data.placa,
-      modelo: data.modelo,
-      ano: data.ano,
-      nome_cliente: data.nome_cliente,
-      observacoes: data.observacoes,
-      itens: [],
-    }).then(() => carregar());
-    return idTemp;
+  async function criarFicha(data: NovaFicha): Promise<number | null> {
+    // Insere no banco e recebe de volta a linha com o id_ficha REAL (auto-incremento).
+    // Usar o id real desde o início evita que atualizações posteriores (concluir,
+    // adicionar peça, excluir) errem a linha por causa de um id temporário.
+    const { data: inserida, error } = await supabase
+      .from('ficha_carro')
+      .insert({
+        placa: data.placa,
+        modelo: data.modelo,
+        ano: data.ano,
+        nome_cliente: data.nome_cliente,
+        observacoes: data.observacoes,
+        itens: [],
+      })
+      .select()
+      .single();
+
+    if (error || !inserida) return null;
+
+    const nova = mapRow(inserida as FichaRow);
+    setFichas((prev) => [nova, ...prev.filter((f) => f.id !== nova.id)]);
+    return nova.id;
   }
 
-  function atualizarFicha(id: number, data: Partial<Pick<FichaCarro, 'status' | 'observacoes'>>) {
+  async function atualizarFicha(id: number, data: Partial<Pick<FichaCarro, 'status' | 'observacoes'>>) {
     setFichas((prev) => prev.map((f) => (f.id === id ? { ...f, ...data } : f)));
-    supabase.from('ficha_carro').update(data).eq('id_ficha', id);
+    const { error } = await supabase.from('ficha_carro').update(data).eq('id_ficha', id);
+    if (error) {
+      // Não persistiu (ex.: regra de acesso). Recarrega para refletir o estado real do banco.
+      await carregar();
+      mostrarAlerta('Erro', 'Não foi possível salvar a alteração. Verifique sua conexão e as permissões.');
+      return;
+    }
+    await carregar();
   }
 
-  function excluirFicha(id: number) {
+  async function excluirFicha(id: number) {
     setFichas((prev) => prev.filter((f) => f.id !== id));
-    supabase.from('ficha_carro').delete().eq('id_ficha', id);
+    const { error } = await supabase.from('ficha_carro').delete().eq('id_ficha', id);
+    if (error) {
+      await carregar();
+      mostrarAlerta('Erro', 'Não foi possível excluir a ficha. Verifique as permissões.');
+    }
   }
 
   function buscarPorId(id: number) {
     return fichas.find((f) => f.id === id);
   }
 
-  function adicionarItem(id_ficha: number, item: Omit<ItemFicha, 'id'>) {
-    setFichas((prev) =>
-      prev.map((f) => {
-        if (f.id !== id_ficha) return f;
-        const novosItens = [...f.itens, { ...item, id: Date.now() }];
-        supabase.from('ficha_carro').update({ itens: novosItens }).eq('id_ficha', id_ficha);
-        return { ...f, itens: novosItens };
-      }),
-    );
+  async function adicionarItem(id_ficha: number, item: Omit<ItemFicha, 'id'>) {
+    const ficha = fichas.find((f) => f.id === id_ficha);
+    if (!ficha) return;
+    const novosItens = [...ficha.itens, { ...item, id: Date.now() }];
+    setFichas((prev) => prev.map((f) => (f.id === id_ficha ? { ...f, itens: novosItens } : f)));
+    const { error } = await supabase.from('ficha_carro').update({ itens: novosItens }).eq('id_ficha', id_ficha);
+    if (error) {
+      await carregar();
+      mostrarAlerta('Erro', 'Não foi possível adicionar a peça. Verifique as permissões.');
+      return;
+    }
+    await carregar();
   }
 
-  function removerItem(id_ficha: number, id_item: number) {
-    setFichas((prev) =>
-      prev.map((f) => {
-        if (f.id !== id_ficha) return f;
-        const novosItens = f.itens.filter((i) => i.id !== id_item);
-        supabase.from('ficha_carro').update({ itens: novosItens }).eq('id_ficha', id_ficha);
-        return { ...f, itens: novosItens };
-      }),
-    );
+  async function removerItem(id_ficha: number, id_item: number) {
+    const ficha = fichas.find((f) => f.id === id_ficha);
+    if (!ficha) return;
+    const novosItens = ficha.itens.filter((i) => i.id !== id_item);
+    setFichas((prev) => prev.map((f) => (f.id === id_ficha ? { ...f, itens: novosItens } : f)));
+    const { error } = await supabase.from('ficha_carro').update({ itens: novosItens }).eq('id_ficha', id_ficha);
+    if (error) {
+      await carregar();
+      mostrarAlerta('Erro', 'Não foi possível remover a peça. Verifique as permissões.');
+      return;
+    }
+    await carregar();
   }
 
   return (

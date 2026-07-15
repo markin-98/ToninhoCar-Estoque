@@ -1,13 +1,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { mostrarAlerta } from '@/lib/alerta';
 import { Movimentacao, TipoMovimentacao } from '@/types';
 
 type NovaMovimentacao = Omit<Movimentacao, 'id'>;
 
 type MovimentacoesContextData = {
   movimentacoes: Movimentacao[];
-  registrarMovimentacao: (data: NovaMovimentacao) => void;
+  registrarMovimentacao: (data: NovaMovimentacao) => Promise<void>;
 };
 
 type MovimentacaoRow = {
@@ -60,10 +61,10 @@ export function MovimentacoesProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(canal); };
   }, [emailUsuario]);
 
-  function registrarMovimentacao(data: NovaMovimentacao) {
+  async function registrarMovimentacao(data: NovaMovimentacao) {
     const nova: Movimentacao = { ...data, id: Date.now() };
     setMovimentacoes((prev) => [nova, ...prev]);
-    supabase.from('movimentacao').insert({
+    const { error } = await supabase.from('movimentacao').insert({
       id_produto: data.id_produto,
       nome_produto: data.nome_produto,
       nome_usuario: data.nome_usuario,
@@ -71,7 +72,9 @@ export function MovimentacoesProvider({ children }: { children: ReactNode }) {
       quantidade: data.quantidade,
       data_hora: data.data_hora,
       motivo: data.motivo,
-    }).then(() => carregar());
+    });
+    if (error) mostrarAlerta('Erro', 'Não foi possível registrar a movimentação.');
+    await carregar();
   }
 
   return (

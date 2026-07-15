@@ -35,17 +35,27 @@ export default function CriarFichaForm({ rotaDetalhes }: Props) {
     return null;
   }
 
-  function handleCriar() {
+  const [salvando, setSalvando] = useState(false);
+
+  async function handleCriar() {
     const erro = validar();
     if (erro) { mostrarAlerta('Dados inválidos', erro); return; }
+    if (salvando) return;
 
-    const id = criarFicha({
+    setSalvando(true);
+    const id = await criarFicha({
       placa: placa.trim(),
       modelo: modelo.trim(),
       ano: ano ? parseInt(ano, 10) : null,
       nome_cliente: nomeCliente.trim(),
       observacoes: observacoes.trim(),
     });
+    setSalvando(false);
+
+    if (id == null) {
+      mostrarAlerta('Erro', 'Não foi possível criar a ficha. Tente novamente.');
+      return;
+    }
 
     router.replace({ pathname: rotaDetalhes as never, params: { id } });
   }
@@ -111,8 +121,8 @@ export default function CriarFichaForm({ rotaDetalhes }: Props) {
           />
         </Campo>
 
-        <TouchableOpacity style={styles.botao} onPress={handleCriar} activeOpacity={0.85}>
-          <Text style={styles.botaoTexto}>Criar Ficha</Text>
+        <TouchableOpacity style={[styles.botao, salvando && { opacity: 0.6 }]} onPress={handleCriar} activeOpacity={0.85} disabled={salvando}>
+          <Text style={styles.botaoTexto}>{salvando ? 'Criando...' : 'Criar Ficha'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
