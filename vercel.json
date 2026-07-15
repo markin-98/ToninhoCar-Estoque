@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd src/app && npm install && npx expo export --platform web",
+  "buildCommand": "cd src/app && npm install && npx expo export --platform web && node scripts/pwa-inject.mjs",
   "outputDirectory": "src/app/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
