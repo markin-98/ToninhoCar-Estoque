@@ -201,6 +201,25 @@ export default function EquipeScreen() {
     return data as { ok?: boolean; erro?: string };
   }
 
+  // Troca da PRÓPRIA senha (usuário logado). Não usa a Edge Function nem
+  // precisa de permissão de admin: o Supabase permite que cada usuário
+  // atualize a própria senha estando autenticado.
+  async function handleTrocarMinhaSenha() {
+    if (novaSenha.length < 6) {
+      mostrarAlerta('Atenção', 'A nova senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    setProcessando(true);
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
+    setProcessando(false);
+    if (error) {
+      mostrarAlerta('Erro', 'Não foi possível trocar a senha. Tente sair e entrar de novo antes de repetir.');
+      return;
+    }
+    mostrarAlerta('Senha alterada', 'Sua senha foi atualizada com sucesso.');
+    fecharPainel();
+  }
+
   async function handleRedefinirSenha(membro: MembroEquipe) {
     if (novaSenha.length < 6) {
       mostrarAlerta('Atenção', 'A nova senha deve ter pelo menos 6 caracteres.');
@@ -429,9 +448,7 @@ export default function EquipeScreen() {
                     </TouchableOpacity>
                   </View>
 
-                  {souEu ? (
-                    <Text style={s.modalAviso}>Você não pode gerenciar o seu próprio acesso.</Text>
-                  ) : redefinindo ? (
+                  {redefinindo ? (
                     <View>
                       <Text style={s.label}>Nova senha</Text>
                       <CampoSenha
@@ -448,13 +465,25 @@ export default function EquipeScreen() {
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={[s.modalBtnPrimario, processando && { opacity: 0.6 }]}
-                          onPress={() => handleRedefinirSenha(membroSel)}
+                          onPress={() => (souEu ? handleTrocarMinhaSenha() : handleRedefinirSenha(membroSel))}
                           disabled={processando}
                           activeOpacity={0.85}
                         >
                           <Text style={s.modalBtnPrimarioTexto}>{processando ? 'Salvando...' : 'Salvar senha'}</Text>
                         </TouchableOpacity>
                       </View>
+                    </View>
+                  ) : souEu ? (
+                    <View style={{ gap: 10 }}>
+                      <AcaoLinha
+                        s={s}
+                        cores={cores}
+                        icone="key-outline"
+                        cor="#7C3AED"
+                        titulo="Trocar minha senha"
+                        onPress={() => setRedefinindo(true)}
+                        desabilitado={processando}
+                      />
                     </View>
                   ) : (
                     <View style={{ gap: 10 }}>
